@@ -97,13 +97,13 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
   );
 
   const handleBulkImport = useCallback(
-    (labels: string[]) => {
+    (labels: string[], mode: 'append' | 'replace') => {
       const newChoices: Choice[] = labels.map((label, i) => ({
         id: generateId(),
         label,
-        color: getColorForIndex(choices.length + i),
+        color: getColorForIndex(mode === 'append' ? choices.length + i : i),
       }));
-      onChange([...choices, ...newChoices]);
+      onChange(mode === 'replace' ? newChoices : [...choices, ...newChoices]);
     },
     [choices, onChange]
   );

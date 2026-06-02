@@ -9,7 +9,7 @@ interface SpinHistoryProps {
 }
 
 const SpinHistory: React.FC<SpinHistoryProps> = ({ history, onClear }) => {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   const formatTime = (ts: number) => {
     const d = new Date(ts);

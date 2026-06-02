@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RotateCcw, Shuffle, Loader2 } from 'lucide-react';
+import { RotateCcw, Shuffle, ChevronDown, ChevronUp, Users, Square } from 'lucide-react';
 import { useSound } from '../../hooks/useSound';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { generateId } from '../../utils/id';
@@ -434,6 +434,8 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
   const [isSpinning, setIsSpinning] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [winnerIdx, setWinnerIdx]   = useState(-1);
+  // collapsed by default on mobile, expanded on desktop
+  const [playersExpanded, setPlayersExpanded] = useState(() => window.innerWidth >= 1024);
 
   // Key bumped to v3 so new defaults load fresh for existing users
   const [players, setPlayers] = useLocalStorage<Player[]>('stb-players-v3', [
@@ -684,6 +686,16 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
     [startPhysics, render]
   );
 
+  /* ── button: stop the bottle mid-spin ───────────────────────────────── */
+  const stopBottle = useCallback(() => {
+    if (!isSpinningRef.current) return;
+    cancelAnimationFrame(animRef.current);
+    velRef.current = 0;
+    stopBottleSpin();
+    const idx = nearestPlayer(rotRef.current);
+    snapToPlayer(idx);
+  }, [nearestPlayer, snapToPlayer, stopBottleSpin]);
+
   /* ── button: simulate a random forceful flick ────────────────────────── */
   const randomFlick = useCallback(() => {
     if (players.length < 2 || isSpinningRef.current) return;
@@ -714,36 +726,15 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
 
   return (
     <div className="flex flex-col lg:flex-row gap-5 w-full">
-      {/* ── Left: player setup ───────────────────────────────────────── */}
-      <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0">
-        <div
-          className="glass-card p-4 flex flex-col overflow-hidden"
-          style={{ height: 'clamp(360px, 74vh, 720px)' }}
-        >
-          <PeopleSetup players={players} onChange={(p) => { setWinnerIdx(-1); setPlayers(p); }} />
-        </div>
-      </aside>
+      {/* ── Canvas + hint + result (order-1 on mobile so it appears first) ── */}
+      <div className="flex-1 flex flex-col items-center gap-4 min-w-0 order-1 lg:order-2">
 
-      {/* ── Right: canvas + hint + result ────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center gap-4 min-w-0">
+        {/* Canvas card — hint + canvas + buttons all inside the same card */}
+        <div className="glass-card p-4 w-full flex flex-col items-center gap-3">
+          <p className="text-xs text-gray-400 dark:text-white/40 select-none">
+            Drag &amp; flick the bottle to spin
+          </p>
 
-        {/* Drag hint */}
-        <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-white/40 select-none">
-          <span>Drag &amp; flick the bottle</span>
-          <span className="w-px h-3 bg-gray-200 dark:bg-white/20" />
-          <span>or</span>
-          <button
-            onClick={randomFlick}
-            disabled={!canFlick || isSpinning}
-            className="text-purple-500 dark:text-purple-400 hover:text-purple-600 dark:hover:text-purple-300 underline underline-offset-2 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            tap here
-          </button>
-          <span>for a random spin</span>
-        </div>
-
-        {/* Canvas card */}
-        <div className="glass-card p-4 w-full flex items-center justify-center">
           <div
             ref={containerRef}
             className="relative w-full"
@@ -763,16 +754,12 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
               className={`${cursor} transition-[filter] duration-150 rounded-full outline-none select-none`}
               style={{ width: size, height: size, display: 'block', touchAction: 'none' }}
             />
-
-            {/* Speed-based glow overlay while spinning */}
             {isSpinning && (
               <div
                 className="absolute inset-0 rounded-full pointer-events-none animate-pulse-glow"
                 style={{ boxShadow: '0 0 55px 6px rgba(124,58,237,0.35)' }}
               />
             )}
-
-            {/* Drag ring */}
             {isDragging && (
               <div
                 className="absolute inset-0 rounded-full pointer-events-none"
@@ -780,31 +767,38 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
               />
             )}
           </div>
-        </div>
 
-        {/* Big SPIN button (simulates flick) */}
-        <button
-          onClick={randomFlick}
-          disabled={!canFlick || isSpinning}
-          className={`px-10 py-3.5 rounded-2xl font-black text-lg tracking-wide transition-all duration-200 select-none
-            ${!canFlick || isSpinning
-              ? 'bg-gray-400 dark:bg-gray-700 text-gray-200 cursor-not-allowed opacity-50'
-              : 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-xl shadow-emerald-500/40 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/60 active:scale-95'
-            }`}
-          aria-label="Random spin"
-        >
-          {isSpinning ? (
-            <span className="flex items-center gap-2">
-              <Loader2 size={18} className="animate-spin" /> Spinning…
-            </span>
-          ) : !canFlick ? (
-            'Need 2+ players'
-          ) : (
-            <span className="flex items-center gap-2">
-              <Shuffle size={18} /> Random Spin
-            </span>
-          )}
-        </button>
+          {/* Buttons — inside the card, same as Spin Wheel */}
+          <div className="flex gap-2">
+            <button
+              onClick={stopBottle}
+              disabled={!isSpinning}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 select-none border
+                ${isSpinning
+                  ? 'bg-red-600 border-red-500 text-white shadow-md shadow-red-500/30 hover:bg-red-500 hover:scale-105 active:scale-95'
+                  : 'bg-transparent border-gray-200 dark:border-white/10 text-gray-400 dark:text-white/35 cursor-not-allowed'
+                }`}
+              aria-label="Stop the bottle"
+            >
+              <Square size={12} fill="currentColor" /> Stop
+            </button>
+
+            <button
+              onClick={randomFlick}
+              disabled={!canFlick || isSpinning}
+              className={`flex items-center gap-1.5 px-6 py-2 rounded-xl font-bold text-sm transition-all duration-200 select-none
+                ${!canFlick || isSpinning
+                  ? 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/30 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95'
+                }`}
+              aria-label="Random spin"
+            >
+              {!canFlick ? 'Need 2+ players' : (
+                <><Shuffle size={14} /> Random Spin</>
+              )}
+            </button>
+          </div>
+        </div>
 
         {/* Result banner */}
         <AnimatePresence>
@@ -865,6 +859,47 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
           )}
         </AnimatePresence>
       </div>
+
+      {/* ── Collapsible players panel (order-2 on mobile, order-1 on desktop) ── */}
+      <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0 order-2 lg:order-1">
+        <div className="glass-card overflow-hidden">
+          {/* Toggle header */}
+          <button
+            onClick={() => setPlayersExpanded((e) => !e)}
+            className="w-full flex items-center gap-2 px-4 py-3.5 text-sm font-bold text-gray-700 dark:text-white/80 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+            aria-expanded={playersExpanded}
+          >
+            <Users size={15} className="text-purple-500 dark:text-purple-400 flex-shrink-0" />
+            <span>Players</span>
+            <span className="text-xs font-normal text-gray-400 dark:text-white/35">
+              ({players.length})
+            </span>
+            <span className="ml-auto text-gray-400 dark:text-white/40">
+              {playersExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+            </span>
+          </button>
+
+          {/* Collapsible content */}
+          <AnimatePresence initial={false}>
+            {playersExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.22, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div
+                  className="p-4 pt-2 flex flex-col overflow-hidden"
+                  style={{ height: 'clamp(300px, 52vh, 680px)' }}
+                >
+                  <PeopleSetup players={players} onChange={(p) => { setWinnerIdx(-1); setPlayers(p); }} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </aside>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronDown, ChevronUp, Target } from 'lucide-react';
 import { Choice, SpinResult } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
@@ -18,6 +19,7 @@ const App: React.FC = () => {
   const { theme, toggleTheme, isDark } = useTheme();
   const [soundEnabled, setSoundEnabled] = useLocalStorage('stw-sound', true);
   const [gameMode, setGameMode] = useLocalStorage<GameMode>('stw-mode', 'wheel');
+  const [choicesExpanded, setChoicesExpanded] = useState(true);
 
   // ── Wheel state ──────────────────────────────────────────────────────────
   const [choices, setChoices] = useLocalStorage<Choice[]>('stw-choices', DEFAULT_PARTY_CHOICES);
@@ -83,18 +85,50 @@ const App: React.FC = () => {
                 transition={{ duration: 0.25 }}
               >
                 <div className="flex flex-col lg:flex-row gap-5">
-                  {/* Left panel */}
-                  <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0 flex flex-col gap-4 order-2 lg:order-1">
-                    <div
-                      className="glass-card p-4 flex flex-col"
-                      style={{ minHeight: 360, maxHeight: '60vh' }}
-                    >
-                      <ChoicePanel choices={choices} onChange={setChoices} />
+                  {/* Left sidebar: collapsible Choices → History → Stats */}
+                  <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0 flex flex-col gap-3 order-2 lg:order-1">
+                    {/* Collapsible Choices */}
+                    <div className="glass-card overflow-hidden">
+                      <button
+                        onClick={() => setChoicesExpanded(e => !e)}
+                        className="w-full flex items-center gap-2 px-4 py-3.5 text-sm font-bold text-gray-700 dark:text-white/80 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                        aria-expanded={choicesExpanded}
+                      >
+                        <Target size={14} className="text-purple-500 dark:text-purple-400 flex-shrink-0" />
+                        <span>Choices</span>
+                        <span className="text-xs font-normal text-gray-400 dark:text-white/35">
+                          ({choices.length})
+                        </span>
+                        <span className="ml-auto text-gray-400 dark:text-white/40">
+                          {choicesExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                        </span>
+                      </button>
+                      <AnimatePresence initial={false}>
+                        {choicesExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.22, ease: 'easeInOut' }}
+                            className="overflow-hidden"
+                          >
+                            <div
+                              className="p-4 pt-2 flex flex-col overflow-hidden"
+                              style={{ height: 'clamp(280px, 50vh, 640px)' }}
+                            >
+                              <ChoicePanel choices={choices} onChange={setChoices} />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
+
+                    <SpinHistory history={history} onClear={() => setHistory([])} />
+                    <StatisticsPanel history={history} />
                   </aside>
 
-                  {/* Wheel + history */}
-                  <div className="flex-1 flex flex-col gap-4 order-1 lg:order-2 min-w-0">
+                  {/* Wheel — main focal area */}
+                  <div className="flex-1 order-1 lg:order-2 min-w-0">
                     <div className="glass-card p-4 sm:p-6">
                       <div className="w-full" style={{ maxWidth: 560, margin: '0 auto' }}>
                         <SpinWheel
@@ -104,10 +138,6 @@ const App: React.FC = () => {
                           isDark={isDark}
                         />
                       </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <SpinHistory history={history} onClear={() => setHistory([])} />
-                      <StatisticsPanel history={history} />
                     </div>
                   </div>
                 </div>

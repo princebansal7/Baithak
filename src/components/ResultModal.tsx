@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, RotateCcw, Trophy } from 'lucide-react';
+import { X, RotateCcw, Trophy } from 'lucide-react';
 import { Choice } from '../types';
 import Confetti from './Confetti';
 
@@ -11,27 +11,6 @@ interface ResultModalProps {
 }
 
 const ResultModal: React.FC<ResultModalProps> = ({ winner, onClose, onSpinAgain }) => {
-  const [shared, setShared] = useState(false);
-
-  useEffect(() => {
-    if (winner) setShared(false);
-  }, [winner]);
-
-  const handleShare = async () => {
-    const text = `🎯 The wheel chose: "${winner?.label}"! Spin yours at Spin the Wheel!`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Spin the Wheel Result', text });
-      } catch {
-        // user cancelled
-      }
-    } else {
-      await navigator.clipboard.writeText(text);
-      setShared(true);
-      setTimeout(() => setShared(false), 2000);
-    }
-  };
-
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -162,23 +141,11 @@ const ResultModal: React.FC<ResultModalProps> = ({ winner, onClose, onSpinAgain 
                 >
                   <button
                     onClick={onSpinAgain}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold transition-all duration-150 hover:scale-105 active:scale-95"
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold transition-all duration-150 hover:scale-105 active:scale-95"
                     aria-label="Spin again"
                   >
                     <RotateCcw size={16} />
                     Spin Again
-                  </button>
-                  <button
-                    onClick={handleShare}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-white transition-all duration-150 hover:scale-105 active:scale-95"
-                    style={{
-                      background: `linear-gradient(135deg, ${winner.color}cc, ${winner.color})`,
-                      boxShadow: `0 4px 15px ${winner.color}44`,
-                    }}
-                    aria-label="Share result"
-                  >
-                    <Share2 size={16} />
-                    {shared ? 'Copied!' : 'Share'}
                   </button>
                 </motion.div>
 

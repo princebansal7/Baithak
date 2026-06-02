@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { Loader2, Zap } from 'lucide-react';
+import { Zap, Square } from 'lucide-react';
 import { Choice } from '../types';
 import { useSound } from '../hooks/useSound';
 import { lightenHex } from '../constants/colors';
@@ -266,28 +266,45 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
     animFrameRef.current = requestAnimationFrame(animate);
   }, [choices, drawWheel, onSpinComplete, playTick, playWin]);
 
-  // Touch gesture: flick to spin
-  const touchRef = useRef<{ x: number; y: number; t: number } | null>(null);
-
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    const t = e.touches[0];
-    touchRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+  // Returns distance from canvas centre in CSS pixels
+  const distFromCenter = useCallback((clientX: number, clientY: number) => {
+    const r = canvasRef.current?.getBoundingClientRect();
+    if (!r) return Infinity;
+    return Math.hypot(clientX - (r.left + r.width / 2), clientY - (r.top + r.height / 2));
   }, []);
 
-  const onTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      if (!touchRef.current || isSpinningRef.current) return;
-      const touch = e.changedTouches[0];
-      const dx = touch.clientX - touchRef.current.x;
-      const dy = touch.clientY - touchRef.current.y;
-      const dt = Math.max(Date.now() - touchRef.current.t, 1);
-      const dist = Math.hypot(dx, dy);
-      const vel = dist / dt;
-      touchRef.current = null;
-      if (vel > 0.25 && dist > 40) spin();
-    },
-    [spin]
-  );
+  const centerR = useCallback(() => {
+    const r = canvasRef.current?.getBoundingClientRect();
+    if (!r) return 28;
+    const outerR = r.width / 2 - 8;
+    return Math.max(28, outerR * 0.13);
+  }, []);
+
+  const [hoverCenter, setHoverCenter] = useState(false);
+
+  const onCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (distFromCenter(e.clientX, e.clientY) <= centerR()) spin();
+  }, [distFromCenter, centerR, spin]);
+
+  const onCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    setHoverCenter(!isSpinning && choices.length > 0 && distFromCenter(e.clientX, e.clientY) <= centerR());
+  }, [isSpinning, choices.length, distFromCenter, centerR]);
+
+  const onCanvasTouchEnd = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    const t = e.changedTouches[0];
+    if (distFromCenter(t.clientX, t.clientY) <= centerR()) spin();
+  }, [distFromCenter, centerR, spin]);
+
+  const stopSpin = useCallback(() => {
+    if (!isSpinningRef.current) return;
+    cancelAnimationFrame(animFrameRef.current);
+    isSpinningRef.current = false;
+    setIsSpinning(false);
+    const winnerIdx = getSegmentAtRotation(rotationRef.current, choices.length);
+    const edge = isNearBoundary(rotationRef.current, choices.length);
+    playWin();
+    onSpinComplete(choices[winnerIdx], edge);
+  }, [choices, onSpinComplete, playWin]);
 
   return (
     <div className="flex flex-col items-center gap-6 w-full">
@@ -317,19 +334,17 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
           </svg>
         </div>
 
-        {/* Canvas */}
+        {/* Canvas — click/tap the centre hub to spin */}
         <canvas
           ref={canvasRef}
           width={size}
           height={size}
-          onClick={spin}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-          aria-label="Spin wheel — click or tap to spin"
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' || e.key === ' ' ? spin() : undefined}
-          className={`${choices.length > 0 && !isSpinning ? 'cursor-pointer hover:brightness-105' : isSpinning ? 'cursor-wait' : 'cursor-default'} transition-[filter] duration-150 rounded-full`}
+          onClick={onCanvasClick}
+          onMouseMove={onCanvasMouseMove}
+          onMouseLeave={() => setHoverCenter(false)}
+          onTouchEnd={onCanvasTouchEnd}
+          aria-label="Spin wheel — tap the centre circle to spin"
+          className={`${isSpinning ? 'cursor-wait' : hoverCenter ? 'cursor-pointer' : 'cursor-default'} transition-[filter] duration-150 rounded-full`}
           style={{ width: size, height: size, display: 'block' }}
         />
 
@@ -345,35 +360,39 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
         )}
       </div>
 
-      {/* Spin button */}
-      <button
-        onClick={spin}
-        disabled={isSpinning || choices.length === 0}
-        className={`relative px-12 py-4 rounded-2xl font-black text-xl tracking-wide transition-all duration-200 select-none
-          ${
-            isSpinning || choices.length === 0
-              ? 'bg-gray-400 dark:bg-gray-700 text-gray-200 cursor-not-allowed opacity-60'
-              : 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-xl shadow-purple-500/40 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/60 active:scale-95'
-          }`}
-        aria-label="Spin the wheel"
-      >
-        <span className="relative z-10 flex items-center gap-2">
-          {isSpinning ? (
-            <span className="flex items-center gap-2">
-              <Loader2 size={18} className="animate-spin" /> Spinning…
-            </span>
-          ) : choices.length === 0 ? (
-            'Add choices first'
-          ) : (
-            <span className="flex items-center gap-2">
-              <Zap size={18} /> SPIN NOW
-            </span>
+      {/* Spin / Stop buttons — compact so the wheel stays the focal point */}
+      <div className="flex gap-2 justify-center">
+        <button
+          onClick={stopSpin}
+          disabled={!isSpinning}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 select-none border
+            ${isSpinning
+              ? 'bg-red-600 border-red-500 text-white shadow-md shadow-red-500/30 hover:bg-red-500 hover:scale-105 active:scale-95'
+              : 'bg-transparent border-gray-200 dark:border-white/10 text-gray-400 dark:text-white/35 cursor-not-allowed'
+            }`}
+          aria-label="Stop the wheel"
+        >
+          <Square size={12} fill="currentColor" /> Stop
+        </button>
+
+        <button
+          onClick={spin}
+          disabled={isSpinning || choices.length === 0}
+          className={`relative flex items-center gap-1.5 px-6 py-2 rounded-xl font-bold text-sm tracking-wide transition-all duration-200 select-none
+            ${isSpinning || choices.length === 0
+              ? 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/30 cursor-not-allowed'
+              : 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 hover:scale-105 active:scale-95'
+            }`}
+          aria-label="Spin the wheel"
+        >
+          {choices.length === 0 ? 'Add choices first' : (
+            <><Zap size={14} /> Spin Now</>
           )}
-        </span>
-        {!isSpinning && choices.length > 0 && (
-          <span className="absolute inset-0 rounded-2xl bg-gradient-to-r from-violet-400 via-purple-400 to-indigo-400 opacity-0 hover:opacity-20 transition-opacity duration-200" />
-        )}
-      </button>
+          {!isSpinning && choices.length > 0 && (
+            <span className="absolute inset-0 rounded-xl bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-200" />
+          )}
+        </button>
+      </div>
     </div>
   );
 };
