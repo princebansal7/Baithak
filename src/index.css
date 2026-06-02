@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Base / Reset
+   ============================================================ */
+* { box-sizing: border-box; }
+
+html {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: #0c0820;
+}
+
+/* ============================================================
+   Theme variables
+   Light mode: white card, dark borders
+   Dark mode:  translucent white card, subtle white borders
+   ============================================================ */
+:root {
+  --bg-card:      rgba(255, 255, 255, 0.82);
+  --border-color: rgba(0, 0, 0, 0.07);
+}
+
+.dark {
+  --bg-card:      rgba(255, 255, 255, 0.04);
+  --border-color: rgba(168, 85, 247, 0.22);
+}
+
+/* ============================================================
+   App background
+   Light mode: soft lavender-white gradient
+   Dark mode:  deep navy
+   ============================================================ */
+.app-bg {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  background: linear-gradient(160deg, #f8fafc 0%, #f3f0ff 45%, #ede9fe 100%);
+  background-attachment: fixed;
+}
+
+.dark .app-bg {
+  background: linear-gradient(135deg, #0c0820 0%, #10082e 55%, #080e26 100%);
+}
+
+/* Ambient radial overlays */
+.app-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(167,139,250,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.07) 0%, transparent 60%);
+}
+
+.dark .app-bg::before {
+  background:
+    radial-gradient(ellipse 70% 55% at 10% 8%,  rgba(168,85,247,0.24) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 48% at 90% 92%, rgba(236,72,153,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 35% at 78% 18%, rgba(99,102,241,0.14) 0%, transparent 55%);
+}
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+::-webkit-scrollbar             { width: 4px; height: 4px; }
+::-webkit-scrollbar-track       { background: transparent; }
+::-webkit-scrollbar-thumb       { background: rgba(124,58,237,0.35); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,0.55); }
+
+/* ============================================================
+   Glassmorphism card
+   Light mode: frosted white card with soft shadow
+   Dark mode:  translucent dark glass
+   ============================================================ */
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 1.5rem;
+  box-shadow:
+    0 2px 20px rgba(0, 0, 0, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.dark .glass-card {
+  box-shadow:
+    0 4px 28px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(168, 85, 247, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================================
+   Animations
+   ============================================================ */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(124,58,237,0.3); }
+  50%       { box-shadow: 0 0 45px rgba(124,58,237,0.65); }
+}
+
+@keyframes spinPop {
+  0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+  60%  { transform: scale(1.08) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.animate-spin-pop   { animation: spinPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.animate-pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
+
+/* ============================================================
+   Touch / canvas
+   ============================================================ */
+canvas { touch-action: none; }
+
+/* ============================================================
+   Layout helpers
+   ============================================================ */
+.content-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .content-grid { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   Focus ring
+   ============================================================ */
+:focus-visible {
+  outline: 2px solid rgba(124,58,237,0.7);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
