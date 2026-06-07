@@ -475,6 +475,13 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
+      // Retina / high-DPI: render at device resolution so text & art are sharp
+      const dpr = window.devicePixelRatio || 1;
+      if (canvas.width !== size * dpr || canvas.height !== size * dpr) {
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       drawScene(ctx, size, players, rotation, wIdx, spinning, isDark);
     },
     [players, size, isDark]

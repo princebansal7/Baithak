@@ -66,8 +66,12 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
   };
 
   const updateChoice = useCallback(
-    (id: string, label: string) => {
-      onChange(choices.map((c) => (c.id === id ? { ...c, label } : c)));
+    (id: string, label: string, description: string) => {
+      onChange(
+        choices.map((c) =>
+          c.id === id ? { ...c, label, description: description || undefined } : c
+        )
+      );
     },
     [choices, onChange]
   );
@@ -204,6 +208,12 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
             <Plus size={18} />
           </button>
         </div>
+
+        {choices.length > 0 && (
+          <p className="-mt-2 mb-3 text-xs text-gray-400 dark:text-white/35">
+            Tip: double-click a choice (or hit the pencil) to add a description.
+          </p>
+        )}
 
         {/* Sortable list */}
         <div

@@ -168,7 +168,6 @@ const App: React.FC = () => {
       <ResultModal
         winner={winner}
         onClose={() => setWinner(null)}
-        onSpinAgain={() => setWinner(null)}
       />
     </div>
   );

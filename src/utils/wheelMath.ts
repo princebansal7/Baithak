@@ -15,16 +15,20 @@ export function getSegmentAtRotation(rotation: number, numSegments: number): num
 }
 
 /**
- * Returns true if the pointer is within `thresholdFraction` of a segment boundary.
+ * Returns true ONLY when the pointer is sitting right on a segment boundary —
+ * a genuine "too close to call" tie. The ambiguous band is a tiny absolute
+ * angle (≈0.34° each side ≈ a few pixels at the rim), not a fraction of the
+ * wedge, so a clear winner a degree or two off the line is never flagged.
  */
 export function isNearBoundary(
   rotation: number,
   numSegments: number,
-  thresholdFraction = 0.04
+  thresholdRad = 0.006
 ): { near: boolean; adjacentIndex: number } {
   if (numSegments <= 1) return { near: false, adjacentIndex: -1 };
   const segmentAngle = (2 * Math.PI) / numSegments;
-  const threshold = segmentAngle * thresholdFraction;
+  // Clamp so the band can never exceed a small slice of a (possibly huge) wedge.
+  const threshold = Math.min(thresholdRad, segmentAngle * 0.12);
   const normalized = ((-rotation) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
   const posInSegment = normalized % segmentAngle;
   const currentIndex = Math.floor(normalized / segmentAngle) % numSegments;

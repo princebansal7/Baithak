@@ -13,38 +13,49 @@ export function useSound(enabled: boolean) {
     return ctxRef.current;
   }, []);
 
-  // Crisp ratchet click — played each time the wheel crosses a segment boundary
+  // Soft wooden "tock" — played each time the wheel crosses a segment boundary.
+  // Mellow sine tones with a tiny attack ramp (no harsh transient) routed through
+  // a lowpass filter so the highs never get edgy.
   const playTick = useCallback(() => {
     if (!enabled) return;
     try {
       const ctx = getCtx();
       const now = ctx.currentTime;
 
-      // Sharp transient (the "click")
-      const click = ctx.createOscillator();
-      click.type = 'square';
-      click.frequency.setValueAtTime(1400, now);
-      click.frequency.exponentialRampToValueAtTime(180, now + 0.016);
-      const clickGain = ctx.createGain();
-      clickGain.gain.setValueAtTime(0.28, now);
-      clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.016);
-      click.connect(clickGain);
-      clickGain.connect(ctx.destination);
-      click.start(now);
-      click.stop(now + 0.018);
+      // Lowpass tames any high-harmonic edge for a soothing, rounded tick
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.setValueAtTime(1200, now);
+      lp.Q.setValueAtTime(0.7, now);
+      lp.connect(ctx.destination);
 
-      // Low body thud underneath
-      const thud = ctx.createOscillator();
-      thud.type = 'triangle';
-      thud.frequency.setValueAtTime(200, now);
-      thud.frequency.exponentialRampToValueAtTime(55, now + 0.022);
-      const thudGain = ctx.createGain();
-      thudGain.gain.setValueAtTime(0.18, now);
-      thudGain.gain.exponentialRampToValueAtTime(0.001, now + 0.022);
-      thud.connect(thudGain);
-      thudGain.connect(ctx.destination);
-      thud.start(now);
-      thud.stop(now + 0.025);
+      // Soft pitched body — gentle drop, short attack to avoid a click/pop
+      const tock = ctx.createOscillator();
+      tock.type = 'sine';
+      tock.frequency.setValueAtTime(620, now);
+      tock.frequency.exponentialRampToValueAtTime(330, now + 0.05);
+      const tockGain = ctx.createGain();
+      tockGain.gain.setValueAtTime(0.0001, now);
+      tockGain.gain.linearRampToValueAtTime(0.16, now + 0.004);
+      tockGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+      tock.connect(tockGain);
+      tockGain.connect(lp);
+      tock.start(now);
+      tock.stop(now + 0.08);
+
+      // Subtle low body underneath for warmth
+      const body = ctx.createOscillator();
+      body.type = 'sine';
+      body.frequency.setValueAtTime(150, now);
+      body.frequency.exponentialRampToValueAtTime(80, now + 0.045);
+      const bodyGain = ctx.createGain();
+      bodyGain.gain.setValueAtTime(0.0001, now);
+      bodyGain.gain.linearRampToValueAtTime(0.09, now + 0.005);
+      bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      body.connect(bodyGain);
+      bodyGain.connect(lp);
+      body.start(now);
+      body.stop(now + 0.07);
     } catch {
       // silently ignore audio errors
     }

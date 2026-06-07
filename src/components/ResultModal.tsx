@@ -1,16 +1,15 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, RotateCcw, Trophy } from 'lucide-react';
+import { X, Trophy } from 'lucide-react';
 import { Choice } from '../types';
 import Confetti from './Confetti';
 
 interface ResultModalProps {
   winner: Choice | null;
   onClose: () => void;
-  onSpinAgain: () => void;
 }
 
-const ResultModal: React.FC<ResultModalProps> = ({ winner, onClose, onSpinAgain }) => {
+const ResultModal: React.FC<ResultModalProps> = ({ winner, onClose }) => {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -112,14 +111,16 @@ const ResultModal: React.FC<ResultModalProps> = ({ winner, onClose, onSpinAgain 
                   </motion.div>
 
                   {winner.description && (
-                    <motion.p
+                    <motion.div
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.52 }}
-                      className="text-sm text-white/65 leading-relaxed px-1"
+                      className="mt-1 px-4 py-3 rounded-xl bg-white/[0.07] border border-white/10"
                     >
-                      {winner.description}
-                    </motion.p>
+                      <p className="text-base text-white/90 leading-relaxed font-medium">
+                        {winner.description}
+                      </p>
+                    </motion.div>
                   )}
                 </div>
 
@@ -132,27 +133,10 @@ const ResultModal: React.FC<ResultModalProps> = ({ winner, onClose, onSpinAgain 
                   style={{ background: winner.color }}
                 />
 
-                {/* Actions */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className="flex gap-3 w-full"
-                >
-                  <button
-                    onClick={onSpinAgain}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold transition-all duration-150 hover:scale-105 active:scale-95"
-                    aria-label="Spin again"
-                  >
-                    <RotateCcw size={16} />
-                    Spin Again
-                  </button>
-                </motion.div>
-
                 <motion.button
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.7 }}
+                  transition={{ delay: 0.6 }}
                   onClick={onClose}
                   className="text-xs text-white/30 hover:text-white/60 transition-colors"
                 >

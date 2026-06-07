@@ -44,6 +44,12 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
+      // Retina / high-DPI: render at device resolution so text is sharp
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      ctx.scale(dpr, dpr);
+
       const n = choices.length;
       const cx = size / 2;
       const cy = size / 2;
@@ -122,38 +128,51 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
         ctx.stroke();
         ctx.restore();
 
-        // Text
+        // Text — first character sits at the outer rim, reading inward toward
+        // the centre (truncating with "…" at the centre end).
         const textA = start + segAngle / 2;
-        const textR = outerR * (n > 16 ? 0.55 : 0.62);
+        const textR = outerR - 14;
         ctx.save();
         ctx.translate(cx, cy);
-        ctx.rotate(textA);
+        // Rotate an extra 180° so +x points from the rim toward the centre.
+        // This is a pure rotation (never a reflection), so glyphs are never
+        // mirrored — and it keeps the left half of the wheel upright.
+        ctx.rotate(textA + Math.PI);
 
-        const maxCh = n > 20 ? 7 : n > 14 ? 10 : n > 8 ? 14 : 20;
-        const raw = choices[i].label;
-        const label = raw.length > maxCh ? raw.slice(0, maxCh - 1) + '…' : raw;
-        const fs = Math.max(9, Math.min(15, (outerR * 0.78) / Math.max(n, 4)));
+        // Font size adapts to actual arc width at the text radius
+        const arcWidthAtText = segAngle * textR;
+        const fs = Math.max(11, Math.min(17, arcWidthAtText * 0.4));
 
-        ctx.textAlign = 'right';
+        ctx.font = `800 ${fs}px Inter, system-ui, sans-serif`;
+        ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.font = `700 ${fs}px Inter, system-ui`;
-        // Draw dark outline pass for maximum legibility on any color
-        ctx.strokeStyle = 'rgba(0,0,0,0.55)';
-        ctx.lineWidth = 3;
-        ctx.lineJoin = 'round';
-        ctx.strokeText(label, textR, 0);
-        ctx.shadowColor = 'rgba(0,0,0,0.8)';
-        ctx.shadowBlur = 5;
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(label, textR, 0);
-        ctx.shadowBlur = 0;
 
-        // Small dot marker near edge
+        // Measure-based truncation: trim until text fits the radial space,
+        // appending "…" at the centre-facing end.
+        const availLen = textR - innerR - 6;
+        const raw = choices[i].label;
+        let label = raw;
+        if (ctx.measureText(label).width > availLen) {
+          while (label.length > 1 && ctx.measureText(label + '…').width > availLen) {
+            label = label.slice(0, -1);
+          }
+          label += '…';
+        }
+
+        // Strong dark outline + white fill — readable on any segment color.
+        // First glyph anchored at the rim (x = -textR), reading toward centre.
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 4.5;
+        ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+        ctx.strokeText(label, -textR, 0);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(label, -textR, 0);
+
+        // Dot just outside the first character, near the rim
         if (n <= 20) {
           ctx.beginPath();
-          ctx.arc(textR + 10, 0, 2, 0, Math.PI * 2);
+          ctx.arc(-(textR + 8), 0, 2, 0, Math.PI * 2);
           ctx.fillStyle = 'rgba(255,255,255,0.5)';
-          ctx.shadowBlur = 0;
           ctx.fill();
         }
         ctx.restore();
