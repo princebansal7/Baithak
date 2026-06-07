@@ -10,7 +10,7 @@ export interface Player {
   color: string;
 }
 
-const NAMES_POOL = ['Prince', 'Ujjwal', 'Prashant', 'Mona', 'Geeky', 'Radhika', 'Sangeetha', 'Orro', 'Vikrant', 'Shraddha'];
+const NAMES_POOL = ['Prince', 'Ujjwal', 'Prashant', 'Mona', 'Geeky', 'Radhika', 'Sangeeta', 'Orro', 'Vikrant', 'Shraddha'];
 
 const QUICK_PRESETS = [
   NAMES_POOL,
