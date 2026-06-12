@@ -7,6 +7,7 @@ import { useTheme } from './hooks/useTheme';
 import { generateId } from './utils/id';
 import { DEFAULT_PARTY_CHOICES } from './constants/presets';
 import Header, { GameMode } from './components/Header';
+import Footer from './components/Footer';
 import SpinWheel from './components/SpinWheel';
 import ChoicePanel from './components/ChoicePanel';
 import ResultModal from './components/ResultModal';
@@ -63,7 +64,7 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className={`app-bg ${isDark ? 'dark' : ''}`}>
+    <div className={`app-bg flex flex-col min-h-screen ${isDark ? 'dark' : ''}`}>
       <Header
         theme={theme}
         onToggleTheme={toggleTheme}
@@ -73,7 +74,7 @@ const App: React.FC = () => {
         onGameModeChange={setGameMode}
       />
 
-      <main className="relative z-10 pt-14 min-h-screen">
+      <main className="relative z-10 pt-14 flex-1">
         <div className="max-w-[1200px] mx-auto px-3 sm:px-4 md:px-6 py-6">
           <AnimatePresence mode="wait">
             {gameMode === 'wheel' ? (
@@ -156,6 +157,8 @@ const App: React.FC = () => {
           </AnimatePresence>
         </div>
       </main>
+
+      <Footer />
 
       {showEdgeCase && edgePrimary && edgeAdjacent && (
         <EdgeCaseModal
