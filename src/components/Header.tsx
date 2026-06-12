@@ -1,8 +1,8 @@
 import React from 'react';
-import { Sun, Moon, Volume2, VolumeX, Disc2 } from 'lucide-react';
+import { Sun, Moon, Volume2, VolumeX, Disc2, Droplets } from 'lucide-react';
 import { Theme } from '../types';
 
-export type GameMode = 'wheel' | 'bottle';
+export type GameMode = 'wheel' | 'bottle' | 'fluid';
 
 interface HeaderProps {
   theme: Theme;
@@ -14,8 +14,9 @@ interface HeaderProps {
 }
 
 const TABS: { id: GameMode; label: string }[] = [
-  { id: 'wheel',  label: 'Spin Wheel'  },
-  { id: 'bottle', label: 'Spin Bottle' },
+  { id: 'wheel',  label: 'Spin Wheel'    },
+  { id: 'bottle', label: 'Spin Bottle'   },
+  { id: 'fluid',  label: 'Color Splash'  },
 ];
 
 const Header: React.FC<HeaderProps> = ({
@@ -46,6 +47,8 @@ const Header: React.FC<HeaderProps> = ({
       >
         {gameMode === 'bottle' ? (
           <span className="text-sm">🍾</span>
+        ) : gameMode === 'fluid' ? (
+          <Droplets size={16} className="text-white" />
         ) : (
           <Disc2 size={16} className="text-white" />
         )}
@@ -79,10 +82,12 @@ const Header: React.FC<HeaderProps> = ({
                 : 'text-gray-500 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/80 hover:bg-black/5 dark:hover:bg-white/5'
               }`}
           >
-            {tab.id === 'wheel' ? <Disc2 size={13} /> : <span className="text-xs leading-none">🍾</span>}
+            {tab.id === 'wheel' ? <Disc2 size={13} />
+              : tab.id === 'fluid' ? <Droplets size={13} />
+              : <span className="text-xs leading-none">🍾</span>}
             <span className="hidden md:inline">{tab.label}</span>
             <span className="md:hidden">
-              {tab.id === 'wheel' ? 'Wheel' : 'Bottle'}
+              {tab.id === 'wheel' ? 'Wheel' : tab.id === 'fluid' ? 'Colors' : 'Bottle'}
             </span>
           </button>
         );

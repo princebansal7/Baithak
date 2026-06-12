@@ -15,6 +15,7 @@ import EdgeCaseModal from './components/EdgeCaseModal';
 import SpinHistory from './components/SpinHistory';
 import StatisticsPanel from './components/StatisticsPanel';
 import SpinBottleGame from './components/SpinBottle/SpinBottleGame';
+import FluidColorGame from './components/FluidColor/FluidColorGame';
 
 const App: React.FC = () => {
   const { theme, toggleTheme, isDark } = useTheme();
@@ -75,6 +76,22 @@ const App: React.FC = () => {
       />
 
       <main className="relative z-10 pt-14 flex-1">
+        {/* Fluid game takes the full viewport — no container padding */}
+        <AnimatePresence mode="wait">
+          {gameMode === 'fluid' && (
+            <motion.div
+              key="fluid"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <FluidColorGame isDark={isDark} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {(gameMode === 'wheel' || gameMode === 'bottle') && (
         <div className="max-w-[1200px] mx-auto px-3 sm:px-4 md:px-6 py-6">
           <AnimatePresence mode="wait">
             {gameMode === 'wheel' ? (
@@ -156,6 +173,7 @@ const App: React.FC = () => {
             )}
           </AnimatePresence>
         </div>
+        )}
       </main>
 
       <Footer />
