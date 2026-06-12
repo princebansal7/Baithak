@@ -22,10 +22,10 @@ const StatisticsPanel: React.FC<StatisticsPanelProps> = ({ history }) => {
   const maxCount = sorted[0]?.count ?? 1;
 
   return (
-    <div className="rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden bg-white/80 dark:bg-white/[0.02]">
+    <div className="rounded-2xl border border-violet-200/60 dark:border-white/10 overflow-hidden bg-white dark:bg-white/[0.02]">
       <button
         onClick={() => setExpanded((e) => !e)}
-        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-all"
+        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white hover:bg-violet-50/70 dark:hover:bg-white/5 transition-all"
         aria-expanded={expanded}
       >
         <span className="flex items-center gap-2">
@@ -65,7 +65,7 @@ const StatisticsPanel: React.FC<StatisticsPanelProps> = ({ history }) => {
                           </span>
                         </span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-gray-100 dark:bg-white/5 overflow-hidden">
+                      <div className="h-1.5 rounded-full bg-violet-100/70 dark:bg-white/5 overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${(item.count / maxCount) * 100}%` }}

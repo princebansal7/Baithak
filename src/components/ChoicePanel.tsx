@@ -115,80 +115,8 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
   return (
     <>
       <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-base font-bold text-gray-900 dark:text-white">Choices</h2>
-            <p className="text-xs text-gray-400 dark:text-white/40">
-              {choices.length === 0
-                ? 'No choices yet'
-                : `${choices.length} choice${choices.length !== 1 ? 's' : ''}`}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Bulk import */}
-            <button
-              onClick={() => setShowBulk(true)}
-              className="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 dark:bg-white/5 hover:bg-purple-100 dark:hover:bg-purple-500/20 text-gray-400 dark:text-white/40 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-150"
-              title="Bulk import"
-              aria-label="Bulk import choices"
-            >
-              <Import size={15} />
-            </button>
-
-            {/* Clear-all — shows animated confirm on click */}
-            <AnimatePresence mode="wait">
-              {choices.length > 0 && !confirmClear && (
-                <motion.button
-                  key="trash-btn"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.15 }}
-                  onClick={() => setConfirmClear(true)}
-                  className="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 dark:bg-white/5 hover:bg-red-100 dark:hover:bg-red-500/20 text-gray-400 dark:text-white/40 hover:text-red-500 dark:hover:text-red-400 transition-all duration-150"
-                  title="Clear all"
-                  aria-label="Clear all choices"
-                >
-                  <Trash2 size={15} />
-                </motion.button>
-              )}
-
-              {confirmClear && (
-                <motion.div
-                  key="confirm-row"
-                  initial={{ opacity: 0, x: 12, scale: 0.92 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: 12, scale: 0.92 }}
-                  transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-                  className="flex items-center gap-1.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/25 rounded-xl px-2.5 py-1.5"
-                >
-                  <span className="text-xs font-semibold text-red-600 dark:text-red-400 whitespace-nowrap">
-                    Clear all {choices.length}?
-                  </span>
-                  <button
-                    onClick={clearAll}
-                    className="px-2 py-0.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition-all hover:scale-105 active:scale-95"
-                    aria-label="Confirm clear all"
-                  >
-                    Yes
-                  </button>
-                  <button
-                    onClick={() => setConfirmClear(false)}
-                    className="px-2 py-0.5 rounded-lg bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-600 dark:text-white/60 text-xs font-semibold transition-all hover:scale-105 active:scale-95"
-                    aria-label="Cancel"
-                  >
-                    No
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Add input */}
-        <div className="flex gap-2 mb-4">
+        {/* Input + actions row */}
+        <div className="flex gap-2 items-center mb-4">
           <input
             ref={inputRef}
             value={inputValue}
@@ -196,13 +124,72 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
             onKeyDown={handleKeyDown}
             placeholder="Type a choice and press Enter…"
             maxLength={60}
-            className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-purple-500/60 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-white/20 outline-none transition-all ring-0 focus:ring-2 focus:ring-purple-500/30 min-w-0"
+            className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-purple-500/60 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/20 outline-none transition-all ring-0 focus:ring-2 focus:ring-purple-500/30 min-w-0"
             aria-label="New choice"
           />
+
+          {/* Bulk import */}
+          <button
+            onClick={() => setShowBulk(true)}
+            className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center bg-violet-50 dark:bg-white/5 hover:bg-purple-100 dark:hover:bg-purple-500/20 text-violet-400 dark:text-white/40 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-150"
+            title="Bulk import"
+            aria-label="Bulk import choices"
+          >
+            <Import size={15} />
+          </button>
+
+          {/* Clear-all */}
+          <AnimatePresence mode="wait">
+            {choices.length > 0 && !confirmClear && (
+              <motion.button
+                key="trash-btn"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+                onClick={() => setConfirmClear(true)}
+                className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center bg-violet-50 dark:bg-white/5 hover:bg-red-100 dark:hover:bg-red-500/20 text-violet-400 dark:text-white/40 hover:text-red-500 dark:hover:text-red-400 transition-all duration-150"
+                title="Clear all"
+                aria-label="Clear all choices"
+              >
+                <Trash2 size={15} />
+              </motion.button>
+            )}
+            {confirmClear && (
+              <motion.div
+                key="confirm-row"
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.92 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+                className="flex-shrink-0 flex items-center gap-1 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/25 rounded-xl px-2 py-1.5"
+              >
+                <span className="text-xs font-semibold text-red-600 dark:text-red-400 whitespace-nowrap">
+                  Clear {choices.length}?
+                </span>
+                <button
+                  onClick={clearAll}
+                  className="px-1.5 py-0.5 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition-all"
+                  aria-label="Confirm clear all"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => setConfirmClear(false)}
+                  className="px-1.5 py-0.5 rounded-lg bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-600 dark:text-white/60 text-xs font-semibold transition-all"
+                  aria-label="Cancel"
+                >
+                  No
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Add */}
           <button
             onClick={handleAdd}
             disabled={!inputValue.trim()}
-            className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center bg-purple-600 hover:bg-purple-500 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all hover:scale-105 active:scale-95 shadow-lg shadow-purple-500/30"
+            className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center bg-purple-600 hover:bg-purple-500 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all hover:scale-105 active:scale-95 shadow-lg shadow-purple-500/30"
             aria-label="Add choice"
           >
             <Plus size={18} />
@@ -222,7 +209,7 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
         >
           {choices.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 text-center gap-2">
-              <Target size={28} className="text-gray-300 dark:text-white/20" />
+              <Target size={28} className="text-violet-300 dark:text-white/20" />
               <p className="text-sm text-gray-400 dark:text-white/30">Add choices above or pick a preset below</p>
             </div>
           ) : (

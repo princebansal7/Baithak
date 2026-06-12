@@ -738,7 +738,7 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
 
         {/* Canvas card — hint + canvas + buttons all inside the same card */}
         <div className="glass-card p-4 w-full flex flex-col items-center gap-3">
-          <p className="text-xs text-gray-400 dark:text-white/40 select-none">
+          <p className="text-xs text-gray-500 dark:text-white/40 select-none">
             Drag &amp; flick the bottle to spin
           </p>
 
@@ -783,7 +783,7 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 select-none border
                 ${isSpinning
                   ? 'bg-red-600 border-red-500 text-white shadow-md shadow-red-500/30 hover:bg-red-500 hover:scale-105 active:scale-95'
-                  : 'bg-transparent border-gray-200 dark:border-white/10 text-gray-400 dark:text-white/35 cursor-not-allowed'
+                  : 'bg-transparent border-violet-200/70 dark:border-white/10 text-gray-400 dark:text-white/35 cursor-not-allowed'
                 }`}
               aria-label="Stop the bottle"
             >
@@ -795,7 +795,7 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
               disabled={!canFlick || isSpinning}
               className={`flex items-center gap-1.5 px-6 py-2 rounded-xl font-bold text-sm transition-all duration-200 select-none
                 ${!canFlick || isSpinning
-                  ? 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/30 cursor-not-allowed'
+                  ? 'bg-violet-50/60 dark:bg-white/5 text-gray-500 dark:text-white/30 cursor-not-allowed'
                   : 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95'
                 }`}
               aria-label="Random spin"
@@ -878,10 +878,10 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
           >
             <Users size={15} className="text-purple-500 dark:text-purple-400 flex-shrink-0" />
             <span>Players</span>
-            <span className="text-xs font-normal text-gray-400 dark:text-white/35">
+            <span className="text-xs font-normal text-gray-500 dark:text-white/35">
               ({players.length})
             </span>
-            <span className="ml-auto text-gray-400 dark:text-white/40">
+            <span className="ml-auto text-gray-500 dark:text-white/40">
               {playersExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
             </span>
           </button>

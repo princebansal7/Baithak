@@ -28,8 +28,8 @@ body {
    Dark mode:  translucent white card, subtle white borders
    ============================================================ */
 :root {
-  --bg-card:      rgba(255, 255, 255, 0.82);
-  --border-color: rgba(0, 0, 0, 0.07);
+  --bg-card:      rgba(255, 255, 255, 0.98);
+  --border-color: rgba(124, 58, 237, 0.14);
 }
 
 .dark {
@@ -46,7 +46,7 @@ body {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  background: linear-gradient(160deg, #f8fafc 0%, #f3f0ff 45%, #ede9fe 100%);
+  background: linear-gradient(160deg, #f0eeff 0%, #e5deff 45%, #d9cefe 100%);
   background-attachment: fixed;
 }
 
@@ -62,8 +62,8 @@ body {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(167,139,250,0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.07) 0%, transparent 60%);
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(139,92,246,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.13) 0%, transparent 60%);
 }
 
 .dark .app-bg::before {
@@ -87,17 +87,19 @@ body {
    Dark mode:  translucent dark glass
    ============================================================ */
 .glass-card {
-  background: var(--bg-card);
+  background: linear-gradient(145deg, #ffffff 0%, #faf8ff 55%, #f5f1ff 100%);
   border: 1px solid var(--border-color);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 1.5rem;
   box-shadow:
-    0 2px 20px rgba(0, 0, 0, 0.06),
-    0 1px 0 rgba(255, 255, 255, 0.9);
+    0 4px 32px rgba(109, 40, 217, 0.11),
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    0 1px 0 rgba(255, 255, 255, 1);
 }
 
 .dark .glass-card {
+  background: rgba(255, 255, 255, 0.04);
   box-shadow:
     0 4px 28px rgba(0, 0, 0, 0.55),
     0 0 0 1px rgba(168, 85, 247, 0.12),

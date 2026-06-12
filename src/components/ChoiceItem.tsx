@@ -58,15 +58,15 @@ const ChoiceItem: React.FC<ChoiceItemProps> = ({ choice, index, onUpdate, onDele
       style={style as React.CSSProperties}
       className={`group flex gap-2 px-3 py-2.5 rounded-xl transition-all duration-150
         ${isEditing ? 'items-start' : 'items-center'}
-        ${isDragging ? 'shadow-2xl ring-2 ring-purple-500/50' : 'hover:bg-gray-100 dark:hover:bg-white/5'}
-        bg-gray-50 dark:bg-white/[0.03]
-        border border-transparent hover:border-gray-200 dark:hover:border-white/10`}
+        ${isDragging ? 'shadow-2xl ring-2 ring-purple-500/50' : 'hover:bg-violet-100/50 dark:hover:bg-white/5'}
+        bg-violet-50/40 dark:bg-white/[0.03]
+        border border-transparent hover:border-violet-200/70 dark:hover:border-white/10`}
     >
       {/* Drag handle */}
       <button
         {...attributes}
         {...listeners}
-        className={`flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-300 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 transition-colors touch-none p-0.5 rounded ${isEditing ? 'mt-1' : ''}`}
+        className={`flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors touch-none p-0.5 rounded ${isEditing ? 'mt-1' : ''}`}
         aria-label="Drag to reorder"
         tabIndex={-1}
       >
@@ -81,7 +81,7 @@ const ChoiceItem: React.FC<ChoiceItemProps> = ({ choice, index, onUpdate, onDele
       />
 
       {/* Index */}
-      <span className={`flex-shrink-0 text-xs text-gray-400 dark:text-gray-500 w-5 text-right font-mono ${isEditing ? 'mt-1' : ''}`}>
+      <span className={`flex-shrink-0 text-xs text-gray-500 dark:text-gray-500 w-5 text-right font-mono ${isEditing ? 'mt-1' : ''}`}>
         {index + 1}
       </span>
 
