@@ -429,6 +429,7 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
   const lastPtrTimeRef       = useRef(0);  // timestamp of last pointermove
   // Sliding window of recent (deltaAngle, time) samples for velocity estimation
   const velSamplesRef        = useRef<{ dA: number; dt: number }[]>([]);
+  const wasSpinningRef       = useRef(false); // was physics active when this drag began?
 
   const [size, setSize]         = useState(340);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -612,11 +613,15 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
       if (players.length < 2) return;
 
       // Interrupt physics so user can grab the bottle mid-spin
+      wasSpinningRef.current = isSpinningRef.current;
       cancelAnimationFrame(animRef.current);
       cancelAnimationFrame(rafPulseRef.current);
       isSpinningRef.current = false;
       setIsSpinning(false);
       velRef.current = 0;
+      // Cut the pre-scheduled spin sound immediately — otherwise it keeps
+      // playing even though the bottle has visually stopped.
+      if (wasSpinningRef.current) stopBottleSpin();
 
       isDraggingRef.current = true;
       setIsDragging(true);
@@ -626,7 +631,7 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
 
       ;(e.currentTarget as HTMLCanvasElement).setPointerCapture(e.pointerId);
     },
-    [players.length, angleFromCentre]
+    [players.length, angleFromCentre, stopBottleSpin]
   );
 
   /* ── pointer move: rotate bottle live with the drag ──────────────────── */
@@ -669,7 +674,22 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
       ;(e.currentTarget as HTMLCanvasElement).releasePointerCapture(e.pointerId);
 
       const samples = velSamplesRef.current;
-      if (samples.length === 0) return;
+      const hadSpin = wasSpinningRef.current;
+      wasSpinningRef.current = false;
+
+      // If the user had interrupted an in-progress spin and doesn't flick it
+      // again, finish the stop the same way the Stop button does — otherwise
+      // the bottle freezes with no result shown.
+      const finalizeStop = () => {
+        const idx = nearestPlayer(rotRef.current);
+        snapToPlayer(idx);
+      };
+
+      if (samples.length === 0) {
+        if (hadSpin) finalizeStop();
+        else render(rotRef.current, -1, false);
+        return;
+      }
 
       // Weighted average: more recent samples get higher weight
       let wSum = 0, vSum = 0;
@@ -682,15 +702,15 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
 
       // Ignore micro-touches that weren't real flicks
       if (Math.abs(flickVel) < 0.0008) {
-        // Just redraw at rest
-        render(rotRef.current, -1, false);
+        if (hadSpin) finalizeStop();
+        else render(rotRef.current, -1, false); // just redraw at rest
         return;
       }
 
       const clamped = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, flickVel));
       startPhysics(clamped);
     },
-    [startPhysics, render]
+    [startPhysics, render, nearestPlayer, snapToPlayer]
   );
 
   /* ── button: stop the bottle mid-spin ───────────────────────────────── */
