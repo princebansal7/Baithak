@@ -376,14 +376,14 @@ export class FluidSim {
 
   config: FluidConfig = {
     simRes: 128,
-    dyeRes: 512,
+    dyeRes: 1024, // higher-res dye grid keeps colour edges smooth instead of shredding into pixel-scale filaments
     densityDissipation: 0.9997,
-    velocityDissipation: 0.99,
+    velocityDissipation: 0.993, // flow settles a bit sooner so paint "sets" instead of endlessly re-churning
     pressureIterations: 20,
-    curl: 18,
+    curl: 11, // gentler vorticity confinement — less fractal tearing at colour boundaries over time
     splatRadius: 0.09,
     splatForce: 2500,
-    dyeDiffusion: 0.06,  // Laplacian spread per frame (<0.25 for stability)
+    dyeDiffusion: 0.1,  // Laplacian spread per frame (<0.25 for stability)
     bgColor: [0.016, 0.012, 0.047],
     isDark: true,
   };

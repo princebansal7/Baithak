@@ -178,15 +178,19 @@ const FluidColorGame: React.FC<Props> = ({ isDark }) => {
 
   const onPointerUp = () => { ptrRef.current.down = false; };
 
-  // ── Picker drag ──────────────────────────────────────────────────────────────
+  // ── Picker drag — commits the colour live so there's no separate "Apply" step ──
   const dragSV = (e: React.MouseEvent | React.TouchEvent) => {
     const el = svBoxRef.current;
     if (!el) return;
     const r  = el.getBoundingClientRect();
     const cx = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
     const cy = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
-    setSat(Math.max(0, Math.min(1, (cx - r.left) / r.width)));
-    setVal(Math.max(0, Math.min(1, 1 - (cy - r.top) / r.height)));
+    const s = Math.max(0, Math.min(1, (cx - r.left) / r.width));
+    const v = Math.max(0, Math.min(1, 1 - (cy - r.top) / r.height));
+    setSat(s);
+    setVal(v);
+    setCustomRgb(hsvToRgb(hue, s, v));
+    setSource('custom');
   };
 
   const dragHue = (e: React.MouseEvent | React.TouchEvent) => {
@@ -194,7 +198,10 @@ const FluidColorGame: React.FC<Props> = ({ isDark }) => {
     if (!el) return;
     const r  = el.getBoundingClientRect();
     const cx = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-    setHue(Math.round(Math.max(0, Math.min(359, ((cx - r.left) / r.width) * 360))));
+    const h = Math.round(Math.max(0, Math.min(359, ((cx - r.left) / r.width) * 360)));
+    setHue(h);
+    setCustomRgb(hsvToRgb(h, sat, val));
+    setSource('custom');
   };
 
   // ── Derived CSS ──────────────────────────────────────────────────────────────
@@ -424,6 +431,8 @@ const FluidColorGame: React.FC<Props> = ({ isDark }) => {
                         if (rgb) {
                           const [h, s, va] = rgbToHsv(...rgb);
                           setHue(h); setSat(s); setVal(va);
+                          setCustomRgb(rgb);
+                          setSource('custom');
                         }
                       }}
                     />
@@ -494,22 +503,6 @@ const FluidColorGame: React.FC<Props> = ({ isDark }) => {
                     }}
                   />
                 </div>
-
-                {/* Apply button */}
-                <button
-                  onClick={() => {
-                    setCustomRgb(pickerRgb);
-                    setSource('custom');
-                    setShowPicker(false);
-                  }}
-                  className="w-full py-2 rounded-xl text-white text-xs font-bold transition-all hover:brightness-110 active:scale-95"
-                  style={{
-                    background: pickerCss,
-                    boxShadow: `0 3px 14px ${pickerCss}48`,
-                  }}
-                >
-                  Apply
-                </button>
               </div>
             </div>
           </motion.div>
