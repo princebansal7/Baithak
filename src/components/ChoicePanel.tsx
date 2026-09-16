@@ -124,14 +124,14 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
             onKeyDown={handleKeyDown}
             placeholder="Type a choice and press Enter…"
             maxLength={60}
-            className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-purple-500/60 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/20 outline-none transition-all ring-0 focus:ring-2 focus:ring-purple-500/30 min-w-0"
+            className="flex-1 bg-white dark:bg-stone-900 border-2 border-stone-300 dark:border-stone-600 focus:border-crimson-600 rounded-xl px-4 py-2.5 text-sm text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-stone-500 outline-none transition-all min-w-0"
             aria-label="New choice"
           />
 
           {/* Bulk import */}
           <button
             onClick={() => setShowBulk(true)}
-            className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center bg-violet-50 dark:bg-white/5 hover:bg-purple-100 dark:hover:bg-purple-500/20 text-violet-400 dark:text-white/40 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-150"
+            className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border-2 border-stone-300 dark:border-stone-600 hover:border-crimson-600 text-stone-600 dark:text-stone-400 hover:text-crimson-600 dark:hover:text-mustard-400 transition-all duration-150"
             title="Bulk import"
             aria-label="Bulk import choices"
           >
@@ -148,7 +148,7 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.15 }}
                 onClick={() => setConfirmClear(true)}
-                className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center bg-violet-50 dark:bg-white/5 hover:bg-red-100 dark:hover:bg-red-500/20 text-violet-400 dark:text-white/40 hover:text-red-500 dark:hover:text-red-400 transition-all duration-150"
+                className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border-2 border-stone-300 dark:border-stone-600 hover:border-red-500 text-stone-600 dark:text-stone-400 hover:text-red-500 transition-all duration-150"
                 title="Clear all"
                 aria-label="Clear all choices"
               >
@@ -162,7 +162,7 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.92 }}
                 transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-                className="flex-shrink-0 flex items-center gap-1 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/25 rounded-xl px-2 py-1.5"
+                className="flex-shrink-0 flex items-center gap-1 bg-red-50 dark:bg-red-950/40 border-2 border-red-500 rounded-xl px-2 py-1.5"
               >
                 <span className="text-xs font-semibold text-red-600 dark:text-red-400 whitespace-nowrap">
                   Clear {choices.length}?
@@ -176,7 +176,7 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
                 </button>
                 <button
                   onClick={() => setConfirmClear(false)}
-                  className="px-1.5 py-0.5 rounded-lg bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-600 dark:text-white/60 text-xs font-semibold transition-all"
+                  className="px-1.5 py-0.5 rounded-lg bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 text-stone-600 dark:text-stone-300 text-xs font-semibold transition-all"
                   aria-label="Cancel"
                 >
                   No
@@ -189,7 +189,7 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
           <button
             onClick={handleAdd}
             disabled={!inputValue.trim()}
-            className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center bg-purple-600 hover:bg-purple-500 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all hover:scale-105 active:scale-95 shadow-lg shadow-purple-500/30"
+            className="flex-shrink-0 w-9 h-9 rounded-xl border-2 border-stone-900 dark:border-stone-100 flex items-center justify-center bg-crimson-600 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all hover:-translate-y-0.5 active:translate-y-0"
             aria-label="Add choice"
           >
             <Plus size={18} />
@@ -197,7 +197,7 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
         </div>
 
         {choices.length > 0 && (
-          <p className="-mt-2 mb-3 text-xs text-gray-400 dark:text-white/35">
+          <p className="-mt-2 mb-3 text-xs text-stone-600 dark:text-stone-400">
             Tip: double-click a choice (or hit the pencil) to add a description.
           </p>
         )}
@@ -205,12 +205,12 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
         {/* Sortable list */}
         <div
           className="flex-1 overflow-y-auto overflow-x-hidden space-y-1 pr-1 min-h-0"
-          style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(124,58,237,0.3) transparent' }}
+          style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(224,71,44,0.35) transparent' }}
         >
           {choices.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 text-center gap-2">
-              <Target size={28} className="text-violet-300 dark:text-white/20" />
-              <p className="text-sm text-gray-400 dark:text-white/30">Add choices above or pick a preset below</p>
+              <Target size={28} className="text-stone-300 dark:text-stone-600" />
+              <p className="text-sm text-stone-600 dark:text-stone-400">Add choices above or pick a preset below</p>
             </div>
           ) : (
             <DndContext

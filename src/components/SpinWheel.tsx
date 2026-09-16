@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { Zap, Square } from 'lucide-react';
 import { Choice } from '../types';
 import { useSound } from '../hooks/useSound';
-import { lightenHex } from '../constants/colors';
 import { getSegmentAtRotation, isNearBoundary, easeOutQuint } from '../utils/wheelMath';
 
 interface SpinWheelProps {
@@ -61,16 +60,11 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
       if (n === 0) {
         // Empty state
         ctx.save();
-        ctx.shadowColor = 'rgba(124,58,237,0.3)';
-        ctx.shadowBlur = 30;
-        const emptyGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, outerR);
-        emptyGrad.addColorStop(0, isDark ? 'rgba(124,58,237,0.1)' : 'rgba(124,58,237,0.05)');
-        emptyGrad.addColorStop(1, isDark ? 'rgba(79,46,220,0.05)' : 'rgba(79,46,220,0.02)');
         ctx.beginPath();
         ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-        ctx.fillStyle = emptyGrad;
+        ctx.fillStyle = isDark ? 'rgba(242,183,5,0.06)' : 'rgba(224,71,44,0.05)';
         ctx.fill();
-        ctx.strokeStyle = isDark ? 'rgba(124,58,237,0.4)' : 'rgba(124,58,237,0.3)';
+        ctx.strokeStyle = isDark ? 'rgba(245,239,224,0.4)' : 'rgba(26,23,18,0.35)';
         ctx.lineWidth = 3;
         ctx.setLineDash([12, 8]);
         ctx.stroke();
@@ -79,10 +73,10 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)';
-        ctx.font = 'bold 15px Inter, system-ui';
+        ctx.fillStyle = isDark ? 'rgba(245,239,224,0.45)' : 'rgba(26,23,18,0.4)';
+        ctx.font = 'bold 15px "Space Grotesk", system-ui';
         ctx.fillText('Add choices to', cx, cy - 12);
-        ctx.fillText('spin the wheel ✨', cx, cy + 12);
+        ctx.fillText('spin the wheel', cx, cy + 12);
         ctx.restore();
         return;
       }
@@ -90,18 +84,7 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
       ctx.setLineDash([]);
       const segAngle = (2 * Math.PI) / n;
 
-      // Outer glow
-      ctx.save();
-      ctx.shadowColor = 'rgba(124,58,237,0.5)';
-      ctx.shadowBlur = 35;
-      ctx.beginPath();
-      ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-      ctx.strokeStyle = 'transparent';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.restore();
-
-      // Segments
+      // Segments — flat carnival fill with bold ink dividers
       for (let i = 0; i < n; i++) {
         const start = -Math.PI / 2 + rotation + i * segAngle;
         const end = start + segAngle;
@@ -112,19 +95,11 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
         ctx.moveTo(cx, cy);
         ctx.arc(cx, cy, outerR, start, end);
         ctx.closePath();
-
-        const midA = start + segAngle / 2;
-        const gx = cx + Math.cos(midA) * outerR * 0.7;
-        const gy = cy + Math.sin(midA) * outerR * 0.7;
-        const grad = ctx.createLinearGradient(cx, cy, gx, gy);
-        grad.addColorStop(0, lightenHex(color, 28));
-        grad.addColorStop(0.6, color);
-        grad.addColorStop(1, lightenHex(color, -15));
-        ctx.fillStyle = grad;
+        ctx.fillStyle = color;
         ctx.fill();
 
-        ctx.strokeStyle = 'rgba(255,255,255,0.22)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = isDark ? '#f5efe0' : '#1a1712';
+        ctx.lineWidth = 2.5;
         ctx.stroke();
         ctx.restore();
 
@@ -143,7 +118,7 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
         const arcWidthAtText = segAngle * textR;
         const fs = Math.max(11, Math.min(17, arcWidthAtText * 0.4));
 
-        ctx.font = `800 ${fs}px Inter, system-ui, sans-serif`;
+        ctx.font = `700 ${fs}px "Space Grotesk", system-ui, sans-serif`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
 
@@ -172,55 +147,48 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
         if (n <= 20) {
           ctx.beginPath();
           ctx.arc(-(textR + 8), 0, 2, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
           ctx.fill();
         }
         ctx.restore();
       }
 
-      // Outer ring border
+      // Outer ring border — bold ink ring
       ctx.save();
       ctx.beginPath();
       ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-      const ringGrad = ctx.createLinearGradient(0, 0, size, size);
-      ringGrad.addColorStop(0, 'rgba(255,255,255,0.85)');
-      ringGrad.addColorStop(0.5, 'rgba(255,255,255,0.4)');
-      ringGrad.addColorStop(1, 'rgba(255,255,255,0.7)');
-      ctx.strokeStyle = ringGrad;
-      ctx.lineWidth = 6;
+      ctx.strokeStyle = isDark ? '#f5efe0' : '#1a1712';
+      ctx.lineWidth = 4;
       ctx.stroke();
       ctx.restore();
 
-      // Decorative outer dots
+      // Decorative bulb-light dots on the rim
       if (n <= 30) {
         const dotCount = Math.min(n * 2, 40);
         for (let d = 0; d < dotCount; d++) {
           const dotA = (d / dotCount) * Math.PI * 2 + rotation;
-          const dotX = cx + Math.cos(dotA) * (outerR + 3);
-          const dotY = cy + Math.sin(dotA) * (outerR + 3);
+          const dotX = cx + Math.cos(dotA) * (outerR + 6);
+          const dotY = cy + Math.sin(dotA) * (outerR + 6);
           ctx.save();
           ctx.beginPath();
-          ctx.arc(dotX, dotY, 2, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.arc(dotX, dotY, 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#f2b705';
           ctx.fill();
+          ctx.strokeStyle = isDark ? '#f5efe0' : '#1a1712';
+          ctx.lineWidth = 1;
+          ctx.stroke();
           ctx.restore();
         }
       }
 
-      // Center hub
+      // Center hub — flat mustard disc with bold ink border
       ctx.save();
-      const hubGrad = ctx.createRadialGradient(cx - innerR * 0.3, cy - innerR * 0.3, 0, cx, cy, innerR);
-      hubGrad.addColorStop(0, '#ffffff');
-      hubGrad.addColorStop(0.6, '#f0f0f0');
-      hubGrad.addColorStop(1, '#d0d0d0');
       ctx.beginPath();
       ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
-      ctx.fillStyle = hubGrad;
-      ctx.shadowColor = 'rgba(0,0,0,0.35)';
-      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#f2b705';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(0,0,0,0.12)';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = isDark ? '#f5efe0' : '#1a1712';
+      ctx.lineWidth = 3;
       ctx.stroke();
       ctx.restore();
 
@@ -229,8 +197,8 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const hubFs = Math.max(7, Math.min(12, innerR * 0.45));
-      ctx.font = `800 ${hubFs}px Inter, system-ui`;
-      ctx.fillStyle = '#555';
+      ctx.font = `700 ${hubFs}px "Space Grotesk", system-ui`;
+      ctx.fillStyle = '#1a1712';
       ctx.fillText('SPIN', cx, cy);
       ctx.restore();
     },
@@ -335,21 +303,11 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
       >
         {/* Pointer arrow */}
         <div
-          className="absolute z-20 drop-shadow-lg"
+          className="absolute z-20"
           style={{ top: 0, left: '50%', transform: 'translateX(-50%) translateY(-2px)' }}
         >
           <svg width="28" height="36" viewBox="0 0 28 36" fill="none">
-            <defs>
-              <linearGradient id="ptrGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#fca5a5" />
-                <stop offset="100%" stopColor="#dc2626" />
-              </linearGradient>
-              <filter id="ptrShadow">
-                <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.4" />
-              </filter>
-            </defs>
-            <path d="M14 36L0 0H28L14 36Z" fill="url(#ptrGrad)" filter="url(#ptrShadow)" />
-            <path d="M14 36L4 6H24L14 36Z" fill="#ef4444" opacity="0.6" />
+            <path d="M14 36L0 0H28L14 36Z" fill="#e0472c" stroke={isDark ? '#f5efe0' : '#1a1712'} strokeWidth="2" strokeLinejoin="round" />
           </svg>
         </div>
 
@@ -371,10 +329,6 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
         {isSpinning && (
           <div
             className="absolute inset-0 rounded-full pointer-events-none animate-pulse-glow"
-            style={{
-              background: 'transparent',
-              boxShadow: '0 0 60px 10px rgba(124,58,237,0.4)',
-            }}
           />
         )}
       </div>
@@ -384,10 +338,10 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
         <button
           onClick={stopSpin}
           disabled={!isSpinning}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 select-none border
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-150 select-none border-2
             ${isSpinning
-              ? 'bg-red-600 border-red-500 text-white shadow-md shadow-red-500/30 hover:bg-red-500 hover:scale-105 active:scale-95'
-              : 'bg-transparent border-gray-200 dark:border-white/10 text-gray-400 dark:text-white/35 cursor-not-allowed'
+              ? 'bg-red-600 border-[var(--ink)] text-white hover:-translate-y-0.5 active:translate-y-0'
+              : 'bg-transparent border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 cursor-not-allowed'
             }`}
           aria-label="Stop the wheel"
         >
@@ -397,18 +351,15 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
         <button
           onClick={spin}
           disabled={isSpinning || choices.length === 0}
-          className={`relative flex items-center gap-1.5 px-6 py-2 rounded-xl font-bold text-sm tracking-wide transition-all duration-200 select-none
+          className={`relative flex items-center gap-1.5 px-6 py-2 rounded-xl font-bold text-sm tracking-wide transition-all duration-150 select-none border-2
             ${isSpinning || choices.length === 0
-              ? 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/30 cursor-not-allowed'
-              : 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 hover:scale-105 active:scale-95'
+              ? 'bg-stone-100 dark:bg-stone-800 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 cursor-not-allowed'
+              : 'bg-crimson-600 border-[var(--ink)] text-white hover:-translate-y-0.5 active:translate-y-0'
             }`}
           aria-label="Spin the wheel"
         >
           {choices.length === 0 ? 'Add choices first' : (
             <><Zap size={14} /> Spin Now</>
-          )}
-          {!isSpinning && choices.length > 0 && (
-            <span className="absolute inset-0 rounded-xl bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-200" />
           )}
         </button>
       </div>

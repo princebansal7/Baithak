@@ -28,21 +28,19 @@ const Header: React.FC<HeaderProps> = ({
   onGameModeChange,
 }) => (
   <header
-    className="fixed top-0 left-0 right-0 z-30 h-14 flex items-center justify-between px-3 md:px-6"
+    className="fixed top-0 left-0 right-0 z-30 h-14 flex items-center justify-between px-3 md:px-6 border-b-[3px]"
     style={{
-      background:
-        theme === 'dark' ? 'rgba(10,10,26,0.88)' : 'rgba(255,255,255,0.90)',
-      backdropFilter: 'blur(20px)',
-      borderBottom: theme === 'dark' ? '1px solid rgba(255,255,255,0.09)' : '1px solid rgba(0,0,0,0.07)',
+      background: theme === 'dark' ? '#171310' : '#f5efe0',
+      borderColor: theme === 'dark' ? '#4a4033' : '#1a1712',
     }}
   >
     {/* ── Logo ────────────────────────────────────────────────────────── */}
     <div className="flex items-center gap-2 flex-shrink-0">
       <div
-        className="w-8 h-8 rounded-xl flex items-center justify-center text-base"
+        className="w-8 h-8 rounded-lg flex items-center justify-center text-base border-2"
         style={{
-          background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
-          boxShadow: '0 2px 12px rgba(124,58,237,0.4)',
+          background: '#e0472c',
+          borderColor: theme === 'dark' ? '#f5efe0' : '#1a1712',
         }}
       >
         {gameMode === 'bottle' ? (
@@ -53,17 +51,16 @@ const Header: React.FC<HeaderProps> = ({
           <Disc2 size={16} className="text-white" />
         )}
       </div>
-      <h1 className="text-sm font-black tracking-tight leading-none hidden sm:block text-gray-900 dark:text-white">
+      <h1 className="font-display text-sm tracking-tight leading-none hidden sm:block text-stone-900 dark:text-mustard-400">
         Baithak
       </h1>
     </div>
 
     {/* ── Game mode tabs (centre) ──────────────────────────────────────── */}
     <div
-      className="flex items-center gap-1 p-1 rounded-2xl"
+      className="flex items-center gap-1 p-1 rounded-xl border-2"
       style={{
-        background:
-          theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+        borderColor: theme === 'dark' ? '#4a4033' : 'rgba(26,23,18,0.15)',
       }}
       role="tablist"
       aria-label="Game mode"
@@ -76,10 +73,10 @@ const Header: React.FC<HeaderProps> = ({
             role="tab"
             aria-selected={active}
             onClick={() => onGameModeChange(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 whitespace-nowrap
               ${active
-                ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 scale-105'
-                : 'text-gray-500 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/80 hover:bg-black/5 dark:hover:bg-white/5'
+                ? 'bg-crimson-600 text-white'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-mustard-300 hover:bg-black/5 dark:hover:bg-white/5'
               }`}
           >
             {tab.id === 'wheel' ? <Disc2 size={13} />
@@ -98,10 +95,10 @@ const Header: React.FC<HeaderProps> = ({
     <div className="flex items-center gap-1.5 flex-shrink-0">
       <button
         onClick={onToggleSound}
-        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150 hover:scale-105 active:scale-95
+        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0
           ${soundEnabled
-            ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-500/30'
-            : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/40 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-600 dark:hover:text-white/60'
+            ? 'bg-mustard-400 border-stone-900 dark:border-stone-100 text-stone-900'
+            : 'bg-transparent border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:text-stone-600 dark:hover:text-stone-300'
           }`}
         aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
         title={soundEnabled ? 'Mute' : 'Unmute'}
@@ -112,7 +109,7 @@ const Header: React.FC<HeaderProps> = ({
 
       <button
         onClick={onToggleTheme}
-        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/50 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-800 dark:hover:text-white/80 transition-all duration-150 hover:scale-105 active:scale-95"
+        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border-2 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-900 dark:hover:border-stone-100 hover:text-stone-900 dark:hover:text-white transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0"
         aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
         title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
       >

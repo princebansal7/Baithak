@@ -63,7 +63,7 @@ const TOOLS: { id: Tool; icon: React.ReactNode; label: string }[] = [
 ];
 
 // Clean 3-stop gradient for the "pick custom color" button
-const CUSTOM_BTN_BG = 'linear-gradient(135deg, #f59e0b 0%, #ec4899 50%, #6366f1 100%)';
+const CUSTOM_BTN_BG = 'linear-gradient(135deg, #e0472c 0%, #f2b705 50%, #1f7a6c 100%)';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -72,11 +72,11 @@ interface Props { isDark: boolean }
 type ColorSource = number | 'custom'; // 0-4 = preset index, 'custom' = picker
 
 // CSS background colours matching the fluid sim bgColor uniform
-const DARK_BG  = '#04030c';
-const LIGHT_BG = '#f3ede2'; // warm cream/ivory
+const DARK_BG  = '#171310';
+const LIGHT_BG = '#f5efe0'; // warm cream/ivory
 
 const bgRgb = (dark: boolean): [number, number, number] =>
-  dark ? [0.016, 0.012, 0.047] : [0.953, 0.929, 0.886];
+  dark ? [0.090, 0.075, 0.063] : [0.961, 0.937, 0.878];
 
 const FluidColorGame: React.FC<Props> = ({ isDark }) => {
   const canvasRef  = useRef<HTMLCanvasElement>(null);
@@ -272,10 +272,9 @@ const FluidColorGame: React.FC<Props> = ({ isDark }) => {
               <button key={id} title={label} onClick={() => setTool(id)} className={circleBtn(active)}
                 style={{
                   width: 28, height: 28,
-                  background: active ? 'rgba(139,92,246,0.85)' : isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
-                  borderColor: active ? 'rgba(167,139,250,0.6)' : 'transparent',
+                  background: active ? 'rgba(224,71,44,0.9)' : isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
+                  borderColor: active ? 'white' : 'transparent',
                   color: active ? 'white' : isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.40)',
-                  boxShadow: active ? '0 0 12px rgba(139,92,246,0.55)' : undefined,
                 }}
               >{icon}</button>
             );
@@ -341,10 +340,9 @@ const FluidColorGame: React.FC<Props> = ({ isDark }) => {
                 <button key={id} title={label} onClick={() => setTool(id)} className={circleBtn(active)}
                   style={{
                     width: 30, height: 30,
-                    background: active ? 'rgba(139,92,246,0.85)' : isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
-                    borderColor: active ? 'rgba(167,139,250,0.6)' : 'transparent',
+                    background: active ? 'rgba(224,71,44,0.9)' : isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
+                    borderColor: active ? 'white' : 'transparent',
                     color: active ? 'white' : isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.40)',
-                    boxShadow: active ? '0 0 12px rgba(139,92,246,0.55)' : undefined,
                   }}
                 >{icon}</button>
               );

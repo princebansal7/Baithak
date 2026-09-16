@@ -109,15 +109,15 @@ const App: React.FC = () => {
                     <div className="glass-card overflow-hidden">
                       <button
                         onClick={() => setChoicesExpanded(e => !e)}
-                        className="w-full flex items-center gap-2 px-4 py-3.5 text-sm font-bold text-gray-700 dark:text-white/80 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                        className="w-full flex items-center gap-2 px-4 py-3.5 text-sm font-bold text-stone-800 dark:text-stone-200 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
                         aria-expanded={choicesExpanded}
                       >
-                        <Target size={14} className="text-purple-500 dark:text-purple-400 flex-shrink-0" />
+                        <Target size={14} className="text-crimson-600 dark:text-mustard-400 flex-shrink-0" />
                         <span>Choices</span>
-                        <span className="text-xs font-normal text-gray-400 dark:text-white/35">
+                        <span className="text-xs font-normal text-stone-600 dark:text-stone-400">
                           ({choices.length})
                         </span>
-                        <span className="ml-auto text-gray-400 dark:text-white/40">
+                        <span className="ml-auto text-stone-600 dark:text-stone-400">
                           {choicesExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
                         </span>
                       </button>

@@ -245,7 +245,7 @@ function drawPlayerHead(
     const nameSz    = Math.max(7, Math.min(baseSz, Math.floor(maxW / (shortName.length * 0.62))));
 
     // Initial (upper)
-    ctx.font = `800 ${Math.round(r * 0.44)}px Inter, system-ui, sans-serif`;
+    ctx.font = `800 ${Math.round(r * 0.44)}px "Space Grotesk", system-ui, sans-serif`;
     ctx.strokeStyle = 'rgba(0,0,0,0.50)';
     ctx.lineWidth   = 3;
     ctx.lineJoin    = 'round';
@@ -256,7 +256,7 @@ function drawPlayerHead(
     ctx.fillText(initial, px, py - r * 0.20);
 
     // Name (lower)
-    ctx.font = `700 ${nameSz}px Inter, system-ui, sans-serif`;
+    ctx.font = `700 ${nameSz}px "Space Grotesk", system-ui, sans-serif`;
     ctx.lineWidth   = 2;
     ctx.shadowBlur  = 3;
     ctx.strokeText(shortName, px, py + r * 0.42);
@@ -264,7 +264,7 @@ function drawPlayerHead(
     ctx.fillText(shortName, px, py + r * 0.42);
   } else {
     // Very small circle: just initial
-    ctx.font = `800 ${Math.round(r * 0.70)}px Inter, system-ui, sans-serif`;
+    ctx.font = `800 ${Math.round(r * 0.70)}px "Space Grotesk", system-ui, sans-serif`;
     ctx.strokeStyle = 'rgba(0,0,0,0.55)';
     ctx.lineWidth   = 3;
     ctx.lineJoin    = 'round';
@@ -299,13 +299,13 @@ function drawScene(
   const tableR = size * 0.44;
   const tableSurface = ctx.createRadialGradient(cx, cy, 0, cx, cy, tableR);
   if (isDark) {
-    tableSurface.addColorStop(0,   'rgba(35,28,72,0.88)');
-    tableSurface.addColorStop(0.7, 'rgba(25,20,56,0.93)');
-    tableSurface.addColorStop(1,   'rgba(16,13,42,0.82)');
+    tableSurface.addColorStop(0,   'rgba(36,31,24,0.92)');
+    tableSurface.addColorStop(0.7, 'rgba(27,23,18,0.95)');
+    tableSurface.addColorStop(1,   'rgba(20,17,13,0.88)');
   } else {
-    tableSurface.addColorStop(0,   'rgba(230,230,255,0.8)');
-    tableSurface.addColorStop(0.7, 'rgba(210,210,245,0.9)');
-    tableSurface.addColorStop(1,   'rgba(190,190,230,0.7)');
+    tableSurface.addColorStop(0,   'rgba(253,250,243,0.9)');
+    tableSurface.addColorStop(0.7, 'rgba(240,232,210,0.92)');
+    tableSurface.addColorStop(1,   'rgba(225,213,180,0.8)');
   }
   ctx.save();
   ctx.beginPath();
@@ -321,11 +321,7 @@ function drawScene(
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, tableR, 0, Math.PI * 2);
-  const ringGrad = ctx.createLinearGradient(0, 0, size, size);
-  ringGrad.addColorStop(0,   'rgba(124,58,237,0.5)');
-  ringGrad.addColorStop(0.5, 'rgba(99,102,241,0.3)');
-  ringGrad.addColorStop(1,   'rgba(139,92,246,0.5)');
-  ctx.strokeStyle = ringGrad;
+  ctx.strokeStyle = isDark ? '#f5efe0' : '#1a1712';
   ctx.lineWidth = 3;
   ctx.stroke();
   ctx.restore();
@@ -758,7 +754,7 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
 
         {/* Canvas card — hint + canvas + buttons all inside the same card */}
         <div className="glass-card p-4 w-full flex flex-col items-center gap-3">
-          <p className="text-xs text-gray-500 dark:text-white/40 select-none">
+          <p className="text-xs text-stone-500 dark:text-stone-400 select-none">
             Drag &amp; flick the bottle to spin
           </p>
 
@@ -784,13 +780,12 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
             {isSpinning && (
               <div
                 className="absolute inset-0 rounded-full pointer-events-none animate-pulse-glow"
-                style={{ boxShadow: '0 0 55px 6px rgba(124,58,237,0.35)' }}
               />
             )}
             {isDragging && (
               <div
                 className="absolute inset-0 rounded-full pointer-events-none"
-                style={{ boxShadow: '0 0 0 3px rgba(124,58,237,0.5)' }}
+                style={{ boxShadow: '0 0 0 3px rgba(224,71,44,0.55)' }}
               />
             )}
           </div>
@@ -800,10 +795,10 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
             <button
               onClick={stopBottle}
               disabled={!isSpinning}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 select-none border
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-150 select-none border-2
                 ${isSpinning
-                  ? 'bg-red-600 border-red-500 text-white shadow-md shadow-red-500/30 hover:bg-red-500 hover:scale-105 active:scale-95'
-                  : 'bg-transparent border-violet-200/70 dark:border-white/10 text-gray-400 dark:text-white/35 cursor-not-allowed'
+                  ? 'bg-red-600 border-[var(--ink)] text-white hover:-translate-y-0.5 active:translate-y-0'
+                  : 'bg-transparent border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 cursor-not-allowed'
                 }`}
               aria-label="Stop the bottle"
             >
@@ -813,10 +808,10 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
             <button
               onClick={randomFlick}
               disabled={!canFlick || isSpinning}
-              className={`flex items-center gap-1.5 px-6 py-2 rounded-xl font-bold text-sm transition-all duration-200 select-none
+              className={`flex items-center gap-1.5 px-6 py-2 rounded-xl font-bold text-sm transition-all duration-150 select-none border-2
                 ${!canFlick || isSpinning
-                  ? 'bg-violet-50/60 dark:bg-white/5 text-gray-500 dark:text-white/30 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95'
+                  ? 'bg-stone-100 dark:bg-stone-800 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 cursor-not-allowed'
+                  : 'bg-teal-700 border-[var(--ink)] text-white hover:-translate-y-0.5 active:translate-y-0'
                 }`}
               aria-label="Random spin"
             >
@@ -836,39 +831,33 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-              className="w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl"
+              className="w-full max-w-sm rounded-3xl overflow-hidden"
               style={{
-                background: 'linear-gradient(135deg, rgba(15,15,35,0.96), rgba(20,20,50,0.98))',
-                border: `1px solid ${winner.color}55`,
-                boxShadow: `0 0 30px ${winner.color}33`,
+                background: 'var(--paper)',
+                border: '3px solid var(--ink)',
+                boxShadow: '6px 6px 0 var(--shadow-color)',
               }}
             >
               <div
-                className="h-1 w-full"
-                style={{ background: `linear-gradient(90deg, transparent, ${winner.color}, transparent)` }}
+                className="h-2.5 w-full"
+                style={{ backgroundImage: `repeating-linear-gradient(45deg, ${winner.color} 0 10px, var(--ink) 10px 20px)` }}
               />
               <div className="p-5 flex items-center gap-4">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.1, type: 'spring', stiffness: 500 }}
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-xl flex-shrink-0"
-                  style={{
-                    backgroundColor: winner.color,
-                    boxShadow: `0 0 20px ${winner.color}66, 0 0 0 2px ${winner.color}66`,
-                  }}
+                  className="w-14 h-14 rounded-full flex items-center justify-center text-white font-display text-lg flex-shrink-0 border-[3px] border-[var(--ink)]"
+                  style={{ backgroundColor: winner.color }}
                 >
                   {winner.name.slice(0, 2).toUpperCase()}
                 </motion.div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-white/40 uppercase tracking-widest">The bottle chose</p>
-                  <p
-                    className="text-2xl font-black text-white truncate"
-                    style={{ textShadow: `0 0 20px ${winner.color}` }}
-                  >
+                  <p className="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-widest">The bottle chose</p>
+                  <p className="font-display text-xl text-stone-900 dark:text-white truncate">
                     {winner.name}
                   </p>
-                  <p className="text-sm text-white/50">It's your turn!</p>
+                  <p className="text-sm text-stone-500 dark:text-stone-400">It's your turn!</p>
                 </div>
                 <button
                   onClick={() => {
@@ -876,7 +865,7 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
                     setWinnerIdx(-1);
                     render(rotRef.current, -1, false);
                   }}
-                  className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 hover:bg-white/20 text-white/60 hover:text-white transition-all"
+                  className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border-2 border-stone-300 dark:border-stone-600 text-stone-500 dark:text-stone-400 hover:border-[var(--ink)] hover:text-[var(--ink)] transition-all"
                   aria-label="Dismiss result"
                 >
                   <RotateCcw size={16} />
@@ -893,15 +882,15 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
           {/* Toggle header */}
           <button
             onClick={() => setPlayersExpanded((e) => !e)}
-            className="w-full flex items-center gap-2 px-4 py-3.5 text-sm font-bold text-gray-700 dark:text-white/80 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+            className="w-full flex items-center gap-2 px-4 py-3.5 text-sm font-bold text-stone-800 dark:text-stone-200 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
             aria-expanded={playersExpanded}
           >
-            <Users size={15} className="text-purple-500 dark:text-purple-400 flex-shrink-0" />
+            <Users size={15} className="text-crimson-600 dark:text-mustard-400 flex-shrink-0" />
             <span>Players</span>
-            <span className="text-xs font-normal text-gray-500 dark:text-white/35">
+            <span className="text-xs font-normal text-stone-600 dark:text-stone-400">
               ({players.length})
             </span>
-            <span className="ml-auto text-gray-500 dark:text-white/40">
+            <span className="ml-auto text-stone-600 dark:text-stone-400">
               {playersExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
             </span>
           </button>

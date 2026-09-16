@@ -81,16 +81,16 @@ const PeopleSetup: React.FC<PeopleSetupProps> = ({ players, onChange }) => {
     <div className="flex flex-col h-full gap-3">
       {/* Quick count picker */}
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-white/30 mb-1.5">Quick set</p>
+        <p className="text-[10px] uppercase tracking-widest text-stone-600 dark:text-stone-400 mb-1.5">Quick set</p>
         <div className="flex flex-wrap gap-1.5">
           {QUICK_COUNTS.map((n) => (
             <button
               key={n}
               onClick={() => setCount(n)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all hover:scale-105 active:scale-95
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold border-2 transition-all
                 ${players.length === n
-                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
-                  : 'bg-violet-50/70 dark:bg-white/5 text-gray-600 dark:text-white/50 hover:bg-violet-100/60 dark:hover:bg-white/10 hover:text-gray-800 dark:hover:text-white/80'}`}
+                  ? 'bg-crimson-600 border-[var(--ink)] text-white'
+                  : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-500'}`}
             >
               {n}
             </button>
@@ -100,13 +100,13 @@ const PeopleSetup: React.FC<PeopleSetupProps> = ({ players, onChange }) => {
 
       {/* Preset names */}
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-white/30 mb-1.5">Presets</p>
+        <p className="text-[10px] uppercase tracking-widest text-stone-600 dark:text-stone-400 mb-1.5">Presets</p>
         <div className="flex flex-col gap-1.5">
           {QUICK_PRESETS.map((preset, i) => (
             <button
               key={i}
               onClick={() => loadPreset(preset)}
-              className="text-left px-3 py-2 rounded-xl bg-violet-50/50 dark:bg-white/5 hover:bg-violet-100/50 dark:hover:bg-white/10 text-xs text-gray-600 dark:text-white/50 hover:text-gray-800 dark:hover:text-white/80 transition-all truncate"
+              className="text-left px-3 py-2 rounded-xl border-2 border-stone-300 dark:border-stone-600 hover:border-stone-500 text-xs text-stone-600 dark:text-stone-300 transition-all truncate"
             >
               {preset.join(', ')}
             </button>
@@ -123,12 +123,12 @@ const PeopleSetup: React.FC<PeopleSetupProps> = ({ players, onChange }) => {
           onKeyDown={(e) => e.key === 'Enter' && addPlayer()}
           placeholder="Add player name…"
           maxLength={20}
-          className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-purple-500/60 rounded-xl px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/20 outline-none focus:ring-2 focus:ring-purple-500/30 transition-all min-w-0"
+          className="flex-1 bg-white dark:bg-stone-900 border-2 border-stone-300 dark:border-stone-600 focus:border-crimson-600 rounded-xl px-3 py-2.5 text-sm text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-stone-500 outline-none transition-all min-w-0"
         />
         <button
           onClick={() => addPlayer()}
           disabled={!input.trim()}
-          className="w-9 h-9 rounded-xl flex items-center justify-center bg-purple-600 hover:bg-purple-500 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all hover:scale-105 active:scale-95"
+          className="w-9 h-9 rounded-xl border-2 border-stone-900 dark:border-stone-100 flex items-center justify-center bg-crimson-600 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all hover:-translate-y-0.5 active:translate-y-0"
         >
           <Plus size={16} />
         </button>
@@ -141,8 +141,8 @@ const PeopleSetup: React.FC<PeopleSetupProps> = ({ players, onChange }) => {
       >
         {players.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-24 text-center gap-1.5">
-            <Users size={24} className="text-violet-300 dark:text-white/20" />
-            <p className="text-xs text-gray-500 dark:text-white/25">No players yet</p>
+            <Users size={24} className="text-stone-300 dark:text-stone-600" />
+            <p className="text-xs text-stone-600 dark:text-stone-400">No players yet</p>
           </div>
         ) : (
           <AnimatePresence initial={false}>
@@ -153,10 +153,10 @@ const PeopleSetup: React.FC<PeopleSetupProps> = ({ players, onChange }) => {
                 animate={{ opacity: 1, x: 0, height: 'auto' }}
                 exit={{ opacity: 0, x: 10, height: 0 }}
                 transition={{ duration: 0.15 }}
-                className="group flex items-center gap-2.5 px-3 py-2 rounded-xl bg-violet-50/40 dark:bg-white/[0.03] hover:bg-violet-100/50 dark:hover:bg-white/[0.06] transition-all"
+                className="group flex items-center gap-2.5 px-3 py-2 rounded-xl border-2 border-transparent hover:border-stone-300 dark:hover:border-stone-600 bg-stone-50 dark:bg-white/[0.03] transition-all"
               >
                 <span
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ring-2 ring-gray-200/60 dark:ring-white/10"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 border-2 border-[var(--ink)]"
                   style={{ backgroundColor: player.color }}
                 >
                   {player.name[0]?.toUpperCase()}
@@ -173,11 +173,11 @@ const PeopleSetup: React.FC<PeopleSetupProps> = ({ players, onChange }) => {
                       if (e.key === 'Escape') setEditingId(null);
                     }}
                     maxLength={20}
-                    className="flex-1 bg-gray-100 dark:bg-white/10 border border-purple-500/50 rounded-lg px-2 py-0.5 text-sm text-gray-900 dark:text-white outline-none focus:ring-1 focus:ring-purple-500 min-w-0"
+                    className="flex-1 bg-white dark:bg-stone-900 border-2 border-crimson-600 rounded-lg px-2 py-0.5 text-sm text-stone-900 dark:text-white outline-none min-w-0"
                   />
                 ) : (
                   <span
-                    className="flex-1 text-sm text-gray-700 dark:text-white/80 truncate cursor-text hover:text-gray-900 dark:hover:text-white"
+                    className="flex-1 text-sm text-stone-700 dark:text-stone-200 truncate cursor-text hover:text-stone-900 dark:hover:text-white"
                     onClick={() => startEdit(player)}
                     title="Click to rename"
                   >
@@ -185,17 +185,17 @@ const PeopleSetup: React.FC<PeopleSetupProps> = ({ players, onChange }) => {
                   </span>
                 )}
 
-                <span className="text-xs text-gray-400 dark:text-white/20 font-mono">{idx + 1}</span>
+                <span className="text-xs text-stone-600 dark:text-stone-400 font-mono">{idx + 1}</span>
                 <button
                   onClick={() => startEdit(player)}
-                  className="w-6 h-6 rounded-lg flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-purple-500 dark:hover:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-500/20 opacity-0 group-hover:opacity-100 transition-all"
+                  className="w-6 h-6 rounded-lg flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-crimson-600 dark:hover:text-mustard-400 hover:bg-stone-200 dark:hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-all"
                   aria-label="Rename player"
                 >
                   <Pencil size={11} />
                 </button>
                 <button
                   onClick={() => removePlayer(player.id)}
-                  className="w-6 h-6 rounded-lg flex items-center justify-center text-gray-400 dark:text-white/20 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 opacity-0 group-hover:opacity-100 transition-all"
+                  className="w-6 h-6 rounded-lg flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 opacity-0 group-hover:opacity-100 transition-all"
                 >
                   <Trash2 size={11} />
                 </button>

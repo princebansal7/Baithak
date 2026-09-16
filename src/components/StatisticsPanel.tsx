@@ -22,17 +22,17 @@ const StatisticsPanel: React.FC<StatisticsPanelProps> = ({ history }) => {
   const maxCount = sorted[0]?.count ?? 1;
 
   return (
-    <div className="rounded-2xl border border-violet-200/60 dark:border-white/10 overflow-hidden bg-white dark:bg-white/[0.02]">
+    <div className="glass-card overflow-hidden">
       <button
         onClick={() => setExpanded((e) => !e)}
-        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-600 dark:text-white/70 hover:text-gray-900 dark:hover:text-white hover:bg-violet-50/70 dark:hover:bg-white/5 transition-all"
+        className="w-full flex items-center justify-between px-4 py-3 text-sm font-bold text-stone-700 dark:text-stone-200 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
         aria-expanded={expanded}
       >
         <span className="flex items-center gap-2">
-          <BarChart2 size={14} />
+          <BarChart2 size={14} className="text-crimson-600 dark:text-mustard-400" />
           Statistics
           {history.length > 0 && (
-            <span className="text-xs text-gray-400 dark:text-white/30 font-normal">({history.length} spins)</span>
+            <span className="text-xs text-stone-600 dark:text-stone-400 font-normal">({history.length} spins)</span>
           )}
         </span>
         {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -49,23 +49,23 @@ const StatisticsPanel: React.FC<StatisticsPanelProps> = ({ history }) => {
           >
             <div className="px-4 pb-4">
               {sorted.length === 0 ? (
-                <p className="text-xs text-gray-400 dark:text-white/25 text-center py-4">Spin the wheel to see stats</p>
+                <p className="text-xs text-stone-600 dark:text-stone-400 text-center py-4">Spin the wheel to see stats</p>
               ) : (
                 <div className="space-y-2.5">
                   {sorted.map((item, i) => (
                     <div key={item.label + i} className="space-y-1">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-600 dark:text-white/60 font-medium truncate max-w-[70%]">
+                        <span className="text-xs text-stone-600 dark:text-stone-300 font-medium truncate max-w-[70%]">
                           {item.label}
                         </span>
-                        <span className="text-xs text-gray-500 dark:text-white/40 font-mono">
+                        <span className="text-xs text-stone-500 dark:text-stone-400 font-mono">
                           {item.count}×{' '}
-                          <span className="text-gray-400 dark:text-white/25">
+                          <span className="text-stone-600 dark:text-stone-400">
                             ({Math.round((item.count / history.length) * 100)}%)
                           </span>
                         </span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-violet-100/70 dark:bg-white/5 overflow-hidden">
+                      <div className="h-2 rounded-full border border-stone-300 dark:border-stone-600 bg-stone-100 dark:bg-white/5 overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${(item.count / maxCount) * 100}%` }}
