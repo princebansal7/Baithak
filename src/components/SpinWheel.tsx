@@ -324,13 +324,6 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
           className={`${isSpinning ? 'cursor-wait' : hoverCenter ? 'cursor-pointer' : 'cursor-default'} transition-[filter] duration-150 rounded-full`}
           style={{ width: size, height: size, display: 'block' }}
         />
-
-        {/* Spinning glow ring */}
-        {isSpinning && (
-          <div
-            className="absolute inset-0 rounded-full pointer-events-none animate-pulse-glow"
-          />
-        )}
       </div>
 
       {/* Spin / Stop buttons — compact so the wheel stays the focal point */}

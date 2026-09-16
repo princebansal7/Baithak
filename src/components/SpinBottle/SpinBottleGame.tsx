@@ -785,11 +785,6 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark, o
               className={`${cursor} transition-[filter] duration-150 rounded-full outline-none select-none`}
               style={{ width: size, height: size, display: 'block', touchAction: 'none' }}
             />
-            {isSpinning && (
-              <div
-                className="absolute inset-0 rounded-full pointer-events-none animate-pulse-glow"
-              />
-            )}
             {isDragging && (
               <div
                 className="absolute inset-0 rounded-full pointer-events-none"
