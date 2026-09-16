@@ -16,6 +16,7 @@ import SpinHistory from './components/SpinHistory';
 import StatisticsPanel from './components/StatisticsPanel';
 import SpinBottleGame from './components/SpinBottle/SpinBottleGame';
 import FluidColorGame from './components/FluidColor/FluidColorGame';
+import ComboGame from './components/Combo/ComboGame';
 
 const App: React.FC = () => {
   const { theme, toggleTheme, isDark } = useTheme();
@@ -91,7 +92,7 @@ const App: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {(gameMode === 'wheel' || gameMode === 'bottle') && (
+        {(gameMode === 'wheel' || gameMode === 'bottle' || gameMode === 'combo') && (
         <div className="max-w-[1200px] mx-auto px-3 sm:px-4 md:px-6 py-6">
           <AnimatePresence mode="wait">
             {gameMode === 'wheel' ? (
@@ -160,7 +161,7 @@ const App: React.FC = () => {
                   </div>
                 </div>
               </motion.div>
-            ) : (
+            ) : gameMode === 'bottle' ? (
               <motion.div
                 key="bottle"
                 initial={{ opacity: 0, y: 16 }}
@@ -169,6 +170,21 @@ const App: React.FC = () => {
                 transition={{ duration: 0.25 }}
               >
                 <SpinBottleGame soundEnabled={soundEnabled} isDark={isDark} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="combo"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.25 }}
+              >
+                <ComboGame
+                  choices={choices}
+                  onRecordResult={recordResult}
+                  soundEnabled={soundEnabled}
+                  isDark={isDark}
+                />
               </motion.div>
             )}
           </AnimatePresence>

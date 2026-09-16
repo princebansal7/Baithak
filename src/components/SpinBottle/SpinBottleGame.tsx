@@ -406,9 +406,10 @@ const MAX_VELOCITY = 0.065; // ≈ 10 rotations/s at peak — feels like a real 
 interface SpinBottleGameProps {
   soundEnabled: boolean;
   isDark: boolean;
+  onWinner?: (player: Player) => void;
 }
 
-const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark }) => {
+const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark, onWinner }) => {
   const canvasRef    = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -498,6 +499,13 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark })
     rafPulseRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafPulseRef.current);
   }, [winnerIdx, render]);
+
+  // Notify a parent (e.g. the Combo tab) whenever the bottle picks a player
+  useEffect(() => {
+    if (winnerIdx >= 0 && players[winnerIdx]) {
+      onWinner?.(players[winnerIdx]);
+    }
+  }, [winnerIdx]); // eslint-disable-line
 
   /* ── helper: angle from canvas centre ────────────────────────────────── */
   const angleFromCentre = useCallback((clientX: number, clientY: number): number => {
