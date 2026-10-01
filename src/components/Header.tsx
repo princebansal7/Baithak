@@ -30,14 +30,12 @@ const Header: React.FC<HeaderProps> = ({
   onGameModeChange,
 }) => (
   <header
-    className="fixed top-0 left-0 right-0 z-30 h-14 flex items-center justify-between gap-2 px-2 sm:px-3 md:px-6 border-b backdrop-blur"
-    style={{ background: 'var(--paper)', borderColor: 'var(--border-color)' }}
+    className="fixed top-0 left-0 right-0 z-30 h-14 flex items-center justify-between gap-2 px-2 sm:px-3 md:px-6 pointer-events-none [&>*]:pointer-events-auto"
   >
     {/* ── Logo ────────────────────────────────────────────────────────── */}
     <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
       <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center text-base border-2"
-        style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderColor: 'transparent' }}
+        className="w-9 h-9 rounded-full flex items-center justify-center text-base glass-accent"
       >
         {gameMode === 'bottle' ? (
           <span className="text-sm">🍾</span>
@@ -58,8 +56,7 @@ const Header: React.FC<HeaderProps> = ({
 
     {/* ── Game mode tabs (centre) ──────────────────────────────────────── */}
     <div
-      className="flex items-center gap-0.5 sm:gap-1 p-1 rounded-xl border-2 min-w-0"
-      style={{ borderColor: 'var(--border-color)', background: 'var(--canvas)' }}
+      className="flex items-center gap-0.5 sm:gap-1 p-1 rounded-full min-w-0 glass-pill"
       role="tablist"
       aria-label="Game mode"
     >
@@ -72,10 +69,10 @@ const Header: React.FC<HeaderProps> = ({
             aria-selected={active}
             aria-label={tab.label}
             onClick={() => onGameModeChange(tab.id)}
-            className={`flex items-center justify-center gap-1.5 min-w-[36px] min-h-[36px] px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 whitespace-nowrap
+            className={`flex items-center justify-center gap-1.5 min-w-[36px] min-h-[36px] px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-150 whitespace-nowrap
               ${active
-                ? 'bg-crimson-600 text-white'
-                : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-crimson-400 hover:bg-black/5 dark:hover:bg-white/5'
+                ? 'glass-accent text-white'
+                : 'text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/10'
               }`}
           >
             {tab.id === 'wheel' ? <Disc2 size={13} />
@@ -96,11 +93,8 @@ const Header: React.FC<HeaderProps> = ({
     <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
       <button
         onClick={onToggleSound}
-        className={`flex items-center justify-center gap-1 min-w-[40px] min-h-[40px] px-2.5 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all duration-150 sm:hover:-translate-y-0.5 active:translate-y-0
-          ${soundEnabled
-            ? 'bg-crimson-50 dark:bg-crimson-600/20 border-crimson-300 dark:border-crimson-600/60 text-crimson-700 dark:text-crimson-300'
-            : 'bg-transparent border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:text-stone-600 dark:hover:text-stone-300'
-          }`}
+        className={`flex items-center justify-center gap-1 min-w-[40px] min-h-[40px] px-2.5 py-1.5 rounded-full text-xs font-bold glass-btn transition-all duration-150 active:scale-95
+          ${soundEnabled ? 'text-crimson-700 dark:text-crimson-300' : 'text-stone-600 dark:text-stone-300'}`}
         aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
         title={soundEnabled ? 'Mute' : 'Unmute'}
       >
@@ -110,7 +104,7 @@ const Header: React.FC<HeaderProps> = ({
 
       <button
         onClick={onToggleTheme}
-        className="flex items-center justify-center gap-1 min-w-[40px] min-h-[40px] px-2.5 py-1.5 rounded-lg text-xs font-semibold border-2 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-900 dark:hover:border-stone-100 hover:text-stone-900 dark:hover:text-white transition-all duration-150 sm:hover:-translate-y-0.5 active:translate-y-0"
+        className="flex items-center justify-center gap-1 min-w-[40px] min-h-[40px] px-2.5 py-1.5 rounded-full text-xs font-bold glass-btn text-stone-800 dark:text-stone-100 transition-all duration-150 active:scale-95"
         aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
         title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
       >
