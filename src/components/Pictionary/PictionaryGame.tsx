@@ -188,7 +188,7 @@ const PictionaryGame: React.FC<PictionaryGameProps> = ({ soundEnabled }) => {
     if (action === 'correct') { playCorrect(); buzz([20, 40, 20]); }
     else if (action === 'wrong') { playWrong(); buzz(120); }
     else { playSkip(); buzz(15); }
-    if (action !== 'wrong') nextWord(); // a wrong guess keeps the same word
+    nextWord();
   };
 
   const undo = () => {
@@ -249,6 +249,22 @@ const PictionaryGame: React.FC<PictionaryGameProps> = ({ soundEnabled }) => {
             <Stepper label="Wrong" value={settings.wrong} step={1} min={-20} max={0} onChange={(n) => setSettings((s) => ({ ...s, wrong: n }))} />
             <Stepper label="Skip" value={settings.skip} step={1} min={-20} max={0} onChange={(n) => setSettings((s) => ({ ...s, skip: n }))} />
             <Stepper label="Timer" value={settings.seconds} step={30} min={30} max={600} format={fmt} onChange={(n) => setSettings((s) => ({ ...s, seconds: n }))} />
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xs font-semibold text-stone-600 dark:text-stone-400">Word level</span>
+            <div className="flex gap-1 p-1 rounded-xl self-center border-2 border-stone-300 dark:border-stone-600" role="radiogroup" aria-label="Difficulty" >
+              {DIFFICULTIES.map((d) => (
+                <button
+                  key={d.id}
+                  role="radio"
+                  aria-checked={difficulty === d.id}
+                  onClick={() => setDifficulty(d.id)}
+                  className={`px-4 min-h-[40px] rounded-lg text-sm font-bold transition-all ${difficulty === d.id ? 'bg-crimson-600 text-white' : 'text-stone-600 dark:text-stone-300'}`}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -394,19 +410,6 @@ const PictionaryGame: React.FC<PictionaryGameProps> = ({ soundEnabled }) => {
 
         {phase === 'ready' && (
           <>
-            <div className="flex gap-1 p-1 rounded-xl border-2 border-stone-300 dark:border-stone-600" role="radiogroup" aria-label="Difficulty">
-              {DIFFICULTIES.map((d) => (
-                <button
-                  key={d.id}
-                  role="radio"
-                  aria-checked={difficulty === d.id}
-                  onClick={() => setDifficulty(d.id)}
-                  className={`px-4 min-h-[40px] rounded-lg text-sm font-bold transition-all ${difficulty === d.id ? 'bg-crimson-600 text-white' : 'text-stone-600 dark:text-stone-300'}`}
-                >
-                  {d.label}
-                </button>
-              ))}
-            </div>
             <button className={`${btnCls} w-full py-4 text-lg bg-crimson-600 border-transparent text-white`} onClick={startTurn} disabled={!drawer}>
               <Play size={20} /> Start {fmt(settings.seconds)} round
             </button>
