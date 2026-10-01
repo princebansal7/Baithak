@@ -29,14 +29,14 @@ const Header: React.FC<HeaderProps> = ({
   onGameModeChange,
 }) => (
   <header
-    className="fixed top-0 left-0 right-0 z-30 h-14 flex items-center justify-between px-3 md:px-6 border-b-[3px]"
+    className="fixed top-0 left-0 right-0 z-30 h-14 flex items-center justify-between gap-2 px-2 sm:px-3 md:px-6 border-b-[3px]"
     style={{
       background: theme === 'dark' ? '#171310' : '#f5efe0',
       borderColor: theme === 'dark' ? '#4a4033' : '#1a1712',
     }}
   >
     {/* ── Logo ────────────────────────────────────────────────────────── */}
-    <div className="flex items-center gap-2 flex-shrink-0">
+    <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
       <div
         className="w-8 h-8 rounded-lg flex items-center justify-center text-base border-2"
         style={{
@@ -61,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({
 
     {/* ── Game mode tabs (centre) ──────────────────────────────────────── */}
     <div
-      className="flex items-center gap-1 p-1 rounded-xl border-2"
+      className="flex items-center gap-0.5 sm:gap-1 p-1 rounded-xl border-2 min-w-0"
       style={{
         borderColor: theme === 'dark' ? '#4a4033' : 'rgba(26,23,18,0.15)',
       }}
@@ -75,8 +75,9 @@ const Header: React.FC<HeaderProps> = ({
             key={tab.id}
             role="tab"
             aria-selected={active}
+            aria-label={tab.label}
             onClick={() => onGameModeChange(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 whitespace-nowrap
+            className={`flex items-center justify-center gap-1.5 min-w-[36px] min-h-[36px] px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 whitespace-nowrap
               ${active
                 ? 'bg-crimson-600 text-white'
                 : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-mustard-300 hover:bg-black/5 dark:hover:bg-white/5'
@@ -87,7 +88,7 @@ const Header: React.FC<HeaderProps> = ({
               : tab.id === 'combo' ? <Layers size={13} />
               : <span className="text-xs leading-none">🍾</span>}
             <span className="hidden md:inline">{tab.label}</span>
-            <span className="md:hidden">
+            <span className={`md:hidden ${active ? '' : 'hidden sm:inline'}`}>
               {tab.id === 'wheel' ? 'Wheel' : tab.id === 'fluid' ? 'Colors' : tab.id === 'combo' ? 'Combo' : 'Bottle'}
             </span>
           </button>
@@ -96,10 +97,10 @@ const Header: React.FC<HeaderProps> = ({
     </div>
 
     {/* ── Controls ────────────────────────────────────────────────────── */}
-    <div className="flex items-center gap-1.5 flex-shrink-0">
+    <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
       <button
         onClick={onToggleSound}
-        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0
+        className={`flex items-center justify-center gap-1 min-w-[40px] min-h-[40px] px-2.5 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all duration-150 sm:hover:-translate-y-0.5 active:translate-y-0
           ${soundEnabled
             ? 'bg-mustard-400 border-stone-900 dark:border-stone-100 text-stone-900'
             : 'bg-transparent border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:text-stone-600 dark:hover:text-stone-300'
@@ -113,7 +114,7 @@ const Header: React.FC<HeaderProps> = ({
 
       <button
         onClick={onToggleTheme}
-        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border-2 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-900 dark:hover:border-stone-100 hover:text-stone-900 dark:hover:text-white transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0"
+        className="flex items-center justify-center gap-1 min-w-[40px] min-h-[40px] px-2.5 py-1.5 rounded-lg text-xs font-semibold border-2 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-900 dark:hover:border-stone-100 hover:text-stone-900 dark:hover:text-white transition-all duration-150 sm:hover:-translate-y-0.5 active:translate-y-0"
         aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
         title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
       >
