@@ -81,9 +81,9 @@ const ComboGame: React.FC<ComboGameProps> = ({ choices, onRecordResult, soundEna
     <div className="flex flex-col items-center gap-4">
       {/* Progress */}
       <div className="flex items-center gap-2 text-xs font-bold text-stone-500 dark:text-stone-400 select-none">
-        <span className={step === 'bottle' ? 'text-crimson-600 dark:text-mustard-400' : ''}>1. Pick a person</span>
+        <span className={step === 'bottle' ? 'text-crimson-600 dark:text-crimson-400' : ''}>1. Pick a person</span>
         <ArrowRight size={12} />
-        <span className={step === 'wheel' || step === 'result' ? 'text-crimson-600 dark:text-mustard-400' : ''}>
+        <span className={step === 'wheel' || step === 'result' ? 'text-crimson-600 dark:text-crimson-400' : ''}>
           2. Spin for a challenge
         </span>
       </div>
@@ -94,7 +94,7 @@ const ComboGame: React.FC<ComboGameProps> = ({ choices, onRecordResult, soundEna
           {currentPlayer && (
             <button
               onClick={goToWheelNow}
-              className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl font-bold text-sm border-2 border-[var(--ink)] bg-crimson-600 text-white hover:-translate-y-0.5 active:translate-y-0 transition-all"
+              className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl font-bold text-sm border-2 border-transparent bg-crimson-600 text-white hover:-translate-y-0.5 active:translate-y-0 transition-all"
             >
               Continue with {currentPlayer.name} <ArrowRight size={14} />
             </button>
@@ -165,7 +165,7 @@ const ComboGame: React.FC<ComboGameProps> = ({ choices, onRecordResult, soundEna
 
               <button
                 onClick={nextTurn}
-                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl font-bold text-sm border-2 border-[var(--ink)] bg-crimson-600 text-white hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl font-bold text-sm border-2 border-transparent bg-crimson-600 text-white hover:-translate-y-0.5 active:translate-y-0 transition-all"
               >
                 <RotateCcw size={14} /> Next Turn
               </button>

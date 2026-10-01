@@ -51,10 +51,16 @@ export default {
         sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
       },
       colors: {
+        // indigo accent (kept the `crimson` name so components don't need renaming) + cool slate neutrals
         crimson: {
-          50: '#fdece6', 100: '#fad0c0', 200: '#f4a688', 300: '#ec7a52',
-          400: '#e55f39', 500: '#e0472c', 600: '#c93a22', 700: '#a52d19',
-          800: '#7a2213', 900: '#551809',
+          50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+          400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+          800: '#3730a3', 900: '#312e81',
+        },
+        stone: {
+          50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1',
+          400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155',
+          800: '#1e293b', 900: '#0f172a', 950: '#020617',
         },
         mustard: {
           50: '#fff9e0', 100: '#fef0b8', 200: '#fde28a', 300: '#fcd45c',

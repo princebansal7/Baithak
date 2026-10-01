@@ -347,7 +347,7 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ choices, onSpinComplete, soundEna
           className={`relative flex items-center gap-1.5 px-6 py-2 rounded-xl font-bold text-sm tracking-wide transition-all duration-150 select-none border-2
             ${isSpinning || choices.length === 0
               ? 'bg-stone-100 dark:bg-stone-800 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 cursor-not-allowed'
-              : 'bg-crimson-600 border-[var(--ink)] text-white hover:-translate-y-0.5 active:translate-y-0'
+              : 'bg-crimson-600 border-transparent text-white hover:-translate-y-0.5 active:translate-y-0'
             }`}
           aria-label="Spin the wheel"
         >

@@ -19,47 +19,42 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background: #171310;
+  background: #0e111c;
 }
 
 /* ============================================================
    Theme variables
-   Light mode: warm cream paper, ink-black borders
-   Dark mode:  charcoal paper, cream borders
+   Light mode: cool off-white canvas, white cards, soft slate borders
+   Dark mode:  deep navy canvas, slightly lifted cards, soft borders
    ============================================================ */
 :root {
-  --ink:          #1a1712;
-  --paper:        #fdfaf3;
-  --shadow-color: #1a1712;
-  --border-color: #1a1712;
+  --ink:          #1e2433;
+  --paper:        #ffffff;
+  --border-color: #e3e7f0;
+  --shadow-color: rgba(30, 36, 51, 0.12);
+  --canvas:       #f3f5fa;
+  --glow:         rgba(99, 102, 241, 0.09);
 }
 
 .dark {
-  --ink:          #f5efe0;
-  --paper:        #241f18;
-  --shadow-color: #f2b705;
-  --border-color: #4a4033;
+  --ink:          #e8ebf5;
+  --paper:        #171b2c;
+  --border-color: #2a3050;
+  --shadow-color: rgba(0, 0, 0, 0.45);
+  --canvas:       #0e111c;
+  --glow:         rgba(129, 140, 248, 0.12);
 }
 
 /* ============================================================
-   App background
-   Light mode: warm cream with a faint polka-dot ticket texture
-   Dark mode:  charcoal with a faint string-light dot texture
+   App background — flat canvas with a soft accent glow at the top
    ============================================================ */
 .app-bg {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  background-color: #f5efe0;
-  background-image: radial-gradient(rgba(26, 23, 18, 0.09) 1.5px, transparent 1.5px);
-  background-size: 22px 22px;
+  background-color: var(--canvas);
+  background-image: radial-gradient(ellipse 80% 40% at 50% 0%, var(--glow), transparent 70%);
   background-attachment: fixed;
-}
-
-.dark .app-bg {
-  background-color: #171310;
-  background-image: radial-gradient(rgba(242, 183, 5, 0.10) 1.5px, transparent 1.5px);
-  background-size: 22px 22px;
 }
 
 /* ============================================================
@@ -67,23 +62,24 @@ body {
    ============================================================ */
 ::-webkit-scrollbar             { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track       { background: transparent; }
-::-webkit-scrollbar-thumb       { background: rgba(224,71,44,0.45); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(224,71,44,0.7); }
+::-webkit-scrollbar-thumb       { background: rgba(99,102,241,0.4); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.65); }
 
 /* ============================================================
-   Carnival card — flat paper surface, bold border, hard offset shadow
+   Card — white / lifted surface, hairline border, soft shadow
    (kept the .glass-card name so components don't need renaming)
    ============================================================ */
 .glass-card {
   background: var(--paper);
-  border: 3px solid var(--border-color);
-  border-radius: 1.25rem;
-  box-shadow: 5px 5px 0 var(--shadow-color);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px var(--shadow-color), 0 8px 24px -12px var(--shadow-color);
 }
 
-.dark .glass-card {
-  border-color: var(--border-color);
-  box-shadow: 5px 5px 0 var(--shadow-color);
+/* Minimal variant: no offset shadow, used by the Pictionary cards */
+.glass-card.card-flat,
+.dark .glass-card.card-flat {
+  box-shadow: none;
 }
 
 /* ============================================================
@@ -120,7 +116,7 @@ canvas { touch-action: none; }
    Focus ring
    ============================================================ */
 :focus-visible {
-  outline: 2px solid #e0472c;
+  outline: 2px solid #4f46e5;
   outline-offset: 2px;
   border-radius: 4px;
 }

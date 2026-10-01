@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
           href="https://www.princebansal.in"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-crimson-600 dark:text-mustard-400 hover:text-crimson-800 dark:hover:text-mustard-300 font-semibold transition-colors duration-150"
+          className="text-crimson-600 dark:text-crimson-400 hover:text-crimson-800 dark:hover:text-crimson-400 font-semibold transition-colors duration-150"
         >
           princebansal.in
         </a>

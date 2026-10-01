@@ -131,7 +131,7 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
           {/* Bulk import */}
           <button
             onClick={() => setShowBulk(true)}
-            className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border-2 border-stone-300 dark:border-stone-600 hover:border-crimson-600 text-stone-600 dark:text-stone-400 hover:text-crimson-600 dark:hover:text-mustard-400 transition-all duration-150"
+            className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border-2 border-stone-300 dark:border-stone-600 hover:border-crimson-600 text-stone-600 dark:text-stone-400 hover:text-crimson-600 dark:hover:text-crimson-400 transition-all duration-150"
             title="Bulk import"
             aria-label="Bulk import choices"
           >
@@ -189,7 +189,7 @@ const ChoicePanel: React.FC<ChoicePanelProps> = ({ choices, onChange }) => {
           <button
             onClick={handleAdd}
             disabled={!inputValue.trim()}
-            className="flex-shrink-0 w-9 h-9 rounded-xl border-2 border-stone-900 dark:border-stone-100 flex items-center justify-center bg-crimson-600 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all hover:-translate-y-0.5 active:translate-y-0"
+            className="flex-shrink-0 w-9 h-9 rounded-xl border-2 border-transparent flex items-center justify-center bg-crimson-600 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all hover:-translate-y-0.5 active:translate-y-0"
             aria-label="Add choice"
           >
             <Plus size={18} />

@@ -228,5 +228,74 @@ export function useSound(enabled: boolean) {
     } catch { /* ignore */ }
   }, [enabled, getCtx]);
 
-  return { playTick, playWin, startBottleSpin, stopBottleSpin, playBottleStop };
+  // ── Pictionary sounds ────────────────────────────────────────
+  // One short enveloped tone; optional pitch glide and lowpass for the buzzy ones.
+  const tone = useCallback(
+    (type: OscillatorType, freq: number, start: number, dur: number, vol: number, glideTo?: number, lowpass?: number) => {
+      const ctx = getCtx();
+      const t = ctx.currentTime + start;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t);
+      if (glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, t + dur);
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(vol, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      osc.connect(gain);
+      if (lowpass) {
+        const lp = ctx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.value = lowpass;
+        gain.connect(lp);
+        lp.connect(ctx.destination);
+      } else {
+        gain.connect(ctx.destination);
+      }
+      osc.start(t);
+      osc.stop(t + dur + 0.02);
+    },
+    [getCtx]
+  );
+
+  const playStart = useCallback(() => {
+    if (!enabled) return;
+    try {
+      [392, 523.25, 659.25, 783.99].forEach((f, i) => tone('triangle', f, i * 0.08, 0.3, 0.3));
+    } catch { /* ignore */ }
+  }, [enabled, tone]);
+
+  const playCorrect = useCallback(() => {
+    if (!enabled) return;
+    try {
+      tone('sine', 880, 0, 0.25, 0.35);
+      tone('sine', 1318.5, 0.09, 0.4, 0.35);
+      tone('triangle', 1760, 0.09, 0.3, 0.12);
+    } catch { /* ignore */ }
+  }, [enabled, tone]);
+
+  const playWrong = useCallback(() => {
+    if (!enabled) return;
+    try {
+      tone('sawtooth', 200, 0, 0.35, 0.3, 90, 700);
+    } catch { /* ignore */ }
+  }, [enabled, tone]);
+
+  const playSkip = useCallback(() => {
+    if (!enabled) return;
+    try {
+      tone('sine', 720, 0, 0.18, 0.3, 320);
+    } catch { /* ignore */ }
+  }, [enabled, tone]);
+
+  const playTimeUp = useCallback(() => {
+    if (!enabled) return;
+    try {
+      tone('square', 520, 0, 0.18, 0.18, undefined, 1500);
+      tone('square', 520, 0.25, 0.18, 0.18, undefined, 1500);
+      tone('square', 390, 0.5, 0.4, 0.18, undefined, 1500);
+    } catch { /* ignore */ }
+  }, [enabled, tone]);
+
+  return { playTick, playWin, startBottleSpin, stopBottleSpin, playBottleStop, playStart, playCorrect, playWrong, playSkip, playTimeUp };
 }

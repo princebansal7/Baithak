@@ -29,7 +29,7 @@ const StatisticsPanel: React.FC<StatisticsPanelProps> = ({ history }) => {
         aria-expanded={expanded}
       >
         <span className="flex items-center gap-2">
-          <BarChart2 size={14} className="text-crimson-600 dark:text-mustard-400" />
+          <BarChart2 size={14} className="text-crimson-600 dark:text-crimson-400" />
           Statistics
           {history.length > 0 && (
             <span className="text-xs text-stone-600 dark:text-stone-400 font-normal">({history.length} spins)</span>

@@ -888,7 +888,7 @@ const SpinBottleGame: React.FC<SpinBottleGameProps> = ({ soundEnabled, isDark, o
             className="w-full flex items-center gap-2 px-4 py-3.5 text-sm font-bold text-stone-800 dark:text-stone-200 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
             aria-expanded={playersExpanded}
           >
-            <Users size={15} className="text-crimson-600 dark:text-mustard-400 flex-shrink-0" />
+            <Users size={15} className="text-crimson-600 dark:text-crimson-400 flex-shrink-0" />
             <span>Players</span>
             <span className="text-xs font-normal text-stone-600 dark:text-stone-400">
               ({players.length})

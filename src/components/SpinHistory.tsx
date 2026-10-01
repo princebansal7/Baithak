@@ -31,7 +31,7 @@ const SpinHistory: React.FC<SpinHistoryProps> = ({ history, onClear }) => {
           className="flex-1 flex items-center gap-2 px-4 py-3 text-sm font-bold text-stone-700 dark:text-stone-200 transition-colors"
           aria-expanded={expanded}
         >
-          <Clock size={14} className="text-crimson-600 dark:text-mustard-400" />
+          <Clock size={14} className="text-crimson-600 dark:text-crimson-400" />
           History
           <span className="text-xs text-stone-600 dark:text-stone-400 font-normal">({history.length})</span>
           <span className="ml-auto">

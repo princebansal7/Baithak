@@ -44,8 +44,8 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ onImport, onClose }) 
           className="w-full max-w-md rounded-3xl p-6"
           style={{
             background: 'var(--paper)',
-            border: '3px solid var(--ink)',
-            boxShadow: '8px 8px 0 var(--shadow-color)',
+            border: '1px solid var(--border-color)',
+            boxShadow: '0 24px 60px -16px var(--shadow-color)',
           }}
           role="dialog"
           aria-modal="true"
@@ -84,7 +84,7 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ onImport, onClose }) 
                 ✓ {parsed.length} choice{parsed.length !== 1 ? 's' : ''} detected
               </span>
             ) : text.length > 0 ? (
-              <span className="text-xs text-mustard-600 dark:text-mustard-400 flex items-center gap-1">
+              <span className="text-xs text-crimson-600 dark:text-crimson-400 flex items-center gap-1">
                 <AlertCircle size={12} /> No valid lines found
               </span>
             ) : null}
@@ -122,7 +122,7 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ onImport, onClose }) 
             <button
               onClick={handleImport}
               disabled={parsed.length === 0}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white bg-crimson-600 border-2 border-[var(--ink)] hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white bg-crimson-600 border-2 border-transparent hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
               <Check size={15} />
               Import {parsed.length > 0 ? `(${parsed.length})` : ''}

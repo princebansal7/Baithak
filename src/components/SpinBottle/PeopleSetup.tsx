@@ -89,7 +89,7 @@ const PeopleSetup: React.FC<PeopleSetupProps> = ({ players, onChange }) => {
               onClick={() => setCount(n)}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold border-2 transition-all
                 ${players.length === n
-                  ? 'bg-crimson-600 border-[var(--ink)] text-white'
+                  ? 'bg-crimson-600 border-transparent text-white'
                   : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-500'}`}
             >
               {n}
@@ -128,7 +128,7 @@ const PeopleSetup: React.FC<PeopleSetupProps> = ({ players, onChange }) => {
         <button
           onClick={() => addPlayer()}
           disabled={!input.trim()}
-          className="w-9 h-9 rounded-xl border-2 border-stone-900 dark:border-stone-100 flex items-center justify-center bg-crimson-600 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all hover:-translate-y-0.5 active:translate-y-0"
+          className="w-9 h-9 rounded-xl border-2 border-transparent flex items-center justify-center bg-crimson-600 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all hover:-translate-y-0.5 active:translate-y-0"
         >
           <Plus size={16} />
         </button>
@@ -188,7 +188,7 @@ const PeopleSetup: React.FC<PeopleSetupProps> = ({ players, onChange }) => {
                 <span className="text-xs text-stone-600 dark:text-stone-400 font-mono">{idx + 1}</span>
                 <button
                   onClick={() => startEdit(player)}
-                  className="w-6 h-6 rounded-lg flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-crimson-600 dark:hover:text-mustard-400 hover:bg-stone-200 dark:hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-all"
+                  className="w-6 h-6 rounded-lg flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-crimson-600 dark:hover:text-crimson-400 hover:bg-stone-200 dark:hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-all"
                   aria-label="Rename player"
                 >
                   <Pencil size={11} />

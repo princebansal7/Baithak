@@ -159,7 +159,7 @@ const ChoiceItem: React.FC<ChoiceItemProps> = ({ choice, index, onUpdate, onDele
           <>
             <button
               onClick={() => setIsEditing(true)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-crimson-600 dark:hover:text-mustard-400 hover:bg-stone-200 dark:hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-all duration-150"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-crimson-600 dark:hover:text-crimson-400 hover:bg-stone-200 dark:hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-all duration-150"
               aria-label={`Edit ${choice.label}`}
             >
               <Pencil size={12} />

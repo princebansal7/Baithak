@@ -45,8 +45,8 @@ const ResultModal: React.FC<ResultModalProps> = ({ winner, onClose }) => {
               className="relative w-full max-w-sm rounded-3xl overflow-hidden"
               style={{
                 background: 'var(--paper)',
-                border: '3px solid var(--ink)',
-                boxShadow: '8px 8px 0 var(--shadow-color)',
+                border: '1px solid var(--border-color)',
+                boxShadow: '0 24px 60px -16px var(--shadow-color)',
               }}
               role="dialog"
               aria-modal="true"

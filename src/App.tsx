@@ -17,11 +17,12 @@ import StatisticsPanel from './components/StatisticsPanel';
 import SpinBottleGame from './components/SpinBottle/SpinBottleGame';
 import FluidColorGame from './components/FluidColor/FluidColorGame';
 import ComboGame from './components/Combo/ComboGame';
+import PictionaryGame from './components/Pictionary/PictionaryGame';
 
 const App: React.FC = () => {
   const { theme, toggleTheme, isDark } = useTheme();
   const [soundEnabled, setSoundEnabled] = useLocalStorage('stw-sound', true);
-  const [gameMode, setGameMode] = useLocalStorage<GameMode>('stw-mode', 'wheel');
+  const [gameMode, setGameMode] = useLocalStorage<GameMode>('stw-mode', 'dict');
   const [choicesExpanded, setChoicesExpanded] = useState(true);
 
   // ── Wheel state ──────────────────────────────────────────────────────────
@@ -92,7 +93,7 @@ const App: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {(gameMode === 'wheel' || gameMode === 'bottle' || gameMode === 'combo') && (
+        {(gameMode === 'wheel' || gameMode === 'bottle' || gameMode === 'combo' || gameMode === 'dict') && (
         <div className="max-w-[1200px] mx-auto px-3 sm:px-4 md:px-6 py-6">
           <AnimatePresence mode="wait">
             {gameMode === 'wheel' ? (
@@ -113,7 +114,7 @@ const App: React.FC = () => {
                         className="w-full flex items-center gap-2 px-4 py-3.5 text-sm font-bold text-stone-800 dark:text-stone-200 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
                         aria-expanded={choicesExpanded}
                       >
-                        <Target size={14} className="text-crimson-600 dark:text-mustard-400 flex-shrink-0" />
+                        <Target size={14} className="text-crimson-600 dark:text-crimson-400 flex-shrink-0" />
                         <span>Choices</span>
                         <span className="text-xs font-normal text-stone-600 dark:text-stone-400">
                           ({choices.length})
@@ -170,6 +171,16 @@ const App: React.FC = () => {
                 transition={{ duration: 0.25 }}
               >
                 <SpinBottleGame soundEnabled={soundEnabled} isDark={isDark} />
+              </motion.div>
+            ) : gameMode === 'dict' ? (
+              <motion.div
+                key="dict"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.25 }}
+              >
+                <PictionaryGame soundEnabled={soundEnabled} />
               </motion.div>
             ) : (
               <motion.div
