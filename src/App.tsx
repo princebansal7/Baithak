@@ -18,6 +18,7 @@ import SpinBottleGame from './components/SpinBottle/SpinBottleGame';
 import FluidColorGame from './components/FluidColor/FluidColorGame';
 import ComboGame from './components/Combo/ComboGame';
 import PictionaryGame from './components/Pictionary/PictionaryGame';
+import FireworksGame from './components/Fireworks/FireworksGame';
 
 const App: React.FC = () => {
   const { theme, toggleTheme, isDark } = useTheme();
@@ -78,7 +79,7 @@ const App: React.FC = () => {
       />
 
       <main className="relative z-10 pt-14 flex-1">
-        {/* Fluid game takes the full viewport — no container padding */}
+        {/* Fluid & Fireworks take the full viewport — no container padding */}
         <AnimatePresence mode="wait">
           {gameMode === 'fluid' && (
             <motion.div
@@ -89,6 +90,17 @@ const App: React.FC = () => {
               transition={{ duration: 0.2 }}
             >
               <FluidColorGame isDark={isDark} />
+            </motion.div>
+          )}
+          {gameMode === 'fireworks' && (
+            <motion.div
+              key="fireworks"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <FireworksGame soundEnabled={soundEnabled} />
             </motion.div>
           )}
         </AnimatePresence>
