@@ -56,42 +56,92 @@ const VOLLEY = 6;       // big shells fired before a name appears
 
 // ─── Text geometry ───────────────────────────────────────────────────────────
 
-// Renders `text` offscreen and returns its filled pixels as points, scaled so the widest
-// extent is 1 horizontally (and at most 0.45 vertically, so short names don't get huge).
-function textPoints(text: string): [number, number][] {
-  const c = document.createElement('canvas');
-  const g = c.getContext('2d');
-  if (!g) return [];
-  const H = 170;
-  const font = '900 120px "Hiragino Sans","Noto Sans JP","Yu Gothic",system-ui,sans-serif';
-  g.font = font;
-  const W = Math.ceil(g.measureText(text).width) + 20;
-  c.width = W;
-  c.height = H;
-  g.font = font;
-  g.textAlign = 'center';
-  g.textBaseline = 'middle';
-  g.fillStyle = '#fff';
-  g.fillText(text, W / 2, H / 2);
-  const data = g.getImageData(0, 0, W, H).data;
+// Lays `text` out to fill a boxW × boxH area of the screen and returns star positions in screen
+// pixels relative to the box centre. Long text wraps onto several lines; the split that gives the
+// biggest letters for this box is chosen, so a name or a whole sentence stays readable on any screen.
+const TEXT_FONT = '800 120px "Hiragino Sans","Noto Sans JP","Yu Gothic",system-ui,sans-serif';
+const LINE_H = 150;
 
-  let pts: [number, number][] = [];
-  for (let step = 2; step <= 12; step++) {
-    pts = [];
-    for (let y = 0; y < H; y += step) {
-      for (let x = 0; x < W; x += step) {
-        if (data[(y * W + x) * 4 + 3] > 128) {
-          pts.push([x - W / 2 + (Math.random() - 0.5) * step * 0.8, y - H / 2 + (Math.random() - 0.5) * step * 0.8]);
+function textPoints(text: string, boxW: number, boxH: number, maxLineH: number): { pts: [number, number][]; scale: number } {
+  const g = document.createElement('canvas').getContext('2d');
+  if (!g) return { pts: [], scale: 1 };
+  g.font = TEXT_FONT;
+  const spaced = /\s/.test(text.trim());
+  const units = spaced ? text.trim().split(/\s+/) : Array.from(text.trim());
+  const join = spaced ? ' ' : '';
+  const width = (i: number, j: number) => g.measureText(units.slice(i, j).join(join)).width;
+  const N = units.length;
+  if (!N) return { pts: [], scale: 1 };
+
+  // For every line count, find the split with the narrowest widest line (small DP), then keep the
+  // line count whose block fits the box at the largest scale.
+  let best: { cuts: number[]; scale: number; maxW: number } | null = null;
+  for (let n = 1; n <= Math.min(N, 6); n++) {
+    const cost: number[][] = Array.from({ length: n + 1 }, () => new Array(N + 1).fill(Infinity));
+    const from: number[][] = Array.from({ length: n + 1 }, () => new Array(N + 1).fill(0));
+    cost[0][0] = 0;
+    for (let k = 1; k <= n; k++) {
+      for (let i = k; i <= N; i++) {
+        for (let j = k - 1; j < i; j++) {
+          const c = Math.max(cost[k - 1][j], width(j, i));
+          if (c < cost[k][i]) { cost[k][i] = c; from[k][i] = j; }
         }
       }
     }
-    if (pts.length <= 1100) break;
+    const maxW = cost[n][N];
+    const scale = Math.min(boxW / maxW, boxH / (n * LINE_H), maxLineH / LINE_H);
+    if (!best || scale > best.scale * 1.04) {
+      const cuts: number[] = [];
+      for (let k = n, i = N; k > 0; k--) { cuts.unshift(i); i = from[k][i]; }
+      best = { cuts, scale, maxW };
+    }
   }
-  if (!pts.length) return [];
-  let hw = 1, hh = 1;
-  for (const [x, y] of pts) { hw = Math.max(hw, Math.abs(x)); hh = Math.max(hh, Math.abs(y)); }
-  const k = Math.min(1 / hw, 0.45 / hh);
-  return pts.map(([x, y]) => [x * k, y * k]);
+  if (!best) return { pts: [], scale: 1 };
+
+  const lines: string[] = [];
+  let prev = 0;
+  for (const c of best.cuts) { lines.push(units.slice(prev, c).join(join)); prev = c; }
+
+  const W = Math.ceil(best.maxW) + 24;
+  const H = lines.length * LINE_H + 24;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const c2 = cv.getContext('2d')!;
+  c2.font = TEXT_FONT;
+  c2.textAlign = 'center';
+  c2.textBaseline = 'middle';
+  c2.fillStyle = '#fff';
+  lines.forEach((l, i) => c2.fillText(l, W / 2, 12 + LINE_H * (i + 0.5)));
+  const data = c2.getImageData(0, 0, W, H).data;
+  const on = (x: number, y: number) =>
+    x >= 0 && y >= 0 && x < W && y < H && data[(y * W + x) * 4 + 3] > 128;
+
+  // Scatter stars at random across the letters, weighted toward the edges, so strokes read as
+  // glowing, uneven bursts of fire rather than a regular dot grid.
+  const edge: number[] = [];
+  const fill: number[] = [];
+  const R2 = 3;
+  for (let y = R2; y < H - R2; y++) {
+    for (let x = R2; x < W - R2; x++) {
+      if (!on(x, y)) continue;
+      const rim = !on(x - R2, y) || !on(x + R2, y) || !on(x, y - R2) || !on(x, y + R2);
+      (rim ? edge : fill).push(x, y);
+    }
+  }
+  const pts: [number, number][] = [];
+  const want = Math.min(3000, Math.round((edge.length + fill.length) / 2 / 5));
+  const k = best.scale;
+  const take = (list: number[], n: number) => {
+    const cnt = list.length / 2;
+    // Walk the pixel list at an even stride (with jitter) so stars cover every stroke without gaps.
+    for (let i = 0; i < n && cnt > 0; i++) {
+      const j = Math.min(cnt - 1, Math.floor(((i + Math.random()) * cnt) / n)) * 2;
+      pts.push([(list[j] - W / 2 + Math.random() - 0.5) * k, (list[j + 1] - H / 2 + Math.random() - 0.5) * k]);
+    }
+  };
+  take(edge, Math.round(want * 0.72));
+  take(fill, Math.round(want * 0.28));
+  return { pts, scale: k };
 }
 
 // ─── Scenery ─────────────────────────────────────────────────────────────────
@@ -123,6 +173,10 @@ const Landscape: React.FC = () => (
       <radialGradient id="windowGlow">
         <stop offset="0" stopColor="#ffb85c" stopOpacity="0.55" />
         <stop offset="1" stopColor="#ffb85c" stopOpacity="0" />
+      </radialGradient>
+      <radialGradient id="lanternGlow">
+        <stop offset="0" stopColor="#ff7a3c" stopOpacity="0.55" />
+        <stop offset="1" stopColor="#ff7a3c" stopOpacity="0" />
       </radialGradient>
       <filter id="mist" x="-30%" y="-150%" width="160%" height="400%"><feGaussianBlur stdDeviation="14" /></filter>
     </defs>
@@ -161,12 +215,40 @@ const Landscape: React.FC = () => (
         return <line key={i} x1={x} y1={y} x2={x} y2={y - 20} strokeWidth="3" />;
       })}
     </g>
+    {/* Paper lanterns hung from the bridge posts */}
+    {[0, 2, 4, 6, 8].map((i) => {
+      const t = i / 8;
+      const x = 560 + 180 * t;
+      const y = 378 - 160 * t * (1 - t) - 20;
+      return (
+        <g key={i} transform={`translate(${x} ${y})`}>
+          <circle cy="9" r="14" fill="url(#lanternGlow)" />
+          <line y1="0" y2="3" stroke="#0a0820" strokeWidth="1.2" />
+          <ellipse cy="9" rx="4.6" ry="6" fill="#ff6a3c" />
+          <ellipse cy="8" rx="2.6" ry="3.6" fill="#ffc27a" opacity="0.85" />
+          <rect x="-2.6" y="2.6" width="5.2" height="1.4" fill="#0a0820" />
+          <rect x="-2.6" y="14" width="5.2" height="1.4" fill="#0a0820" />
+        </g>
+      );
+    })}
     <g fill="#0a0820">
       <circle cx="560" cy="354" r="4.5" />
       <circle cx="740" cy="354" r="4.5" />
       <rect x="554" y="376" width="12" height="16" />
       <rect x="734" y="376" width="12" height="16" />
     </g>
+
+    {/* Festival nobori flags on poles, either side of the bridge */}
+    {[{ x: 522, c: '#a62a1c' }, { x: 778, c: '#2a3f8f' }].map(({ x, c }) => (
+      <g key={x}>
+        <rect x={x - 1} y="314" width="2" height="68" fill="#0a0820" />
+        <rect x={x - 1} y="314" width="15" height="2" fill="#0a0820" />
+        <path d={`M${x + 2} 316 h10 v42 l-5 -4 l-5 4 Z`} fill={c} />
+        <rect x={x + 5} y="322" width="4" height="3" fill="#f3e9d2" opacity="0.85" />
+        <rect x={x + 5} y="330" width="4" height="3" fill="#f3e9d2" opacity="0.85" />
+        <rect x={x + 5} y="338" width="4" height="3" fill="#f3e9d2" opacity="0.85" />
+      </g>
+    ))}
 
     {/* Village houses */}
     <g fill="#060516">
@@ -187,7 +269,7 @@ const Landscape: React.FC = () => (
     <g fill="#060516">
       {Array.from({ length: 40 }, (_, i) => {
         const x = -390 + i * 50 + (i % 3) * 9;
-        if ((x > 530 && x < 770) || (x > 1000 && x < 1210) || (x > 1240 && x < 1330) || (x > 1400 && x < 1600) || (x > -350 && x < -90)) return null;
+        if ((x > 530 && x < 770) || (x > 1000 && x < 1210) || (x > 1240 && x < 1330) || (x > 1400 && x < 1600) || (x > -350 && x < -90) || (x > 175 && x < 325)) return null;
         const h = 36 + ((i * 37) % 26);
         return (
           <g key={i}>
@@ -198,13 +280,16 @@ const Landscape: React.FC = () => (
       })}
     </g>
 
-    {/* Vermilion torii standing in the river */}
-    <g transform="translate(250 392)">
-      <rect x="-54" y="-98" width="11" height="98" fill="#a62a1c" />
-      <rect x="43" y="-98" width="11" height="98" fill="#a62a1c" />
-      <rect x="-46" y="-72" width="92" height="8" fill="#7d1d14" />
-      <path d="M-72 -108 Q0 -92 72 -108 L78 -120 Q0 -104 -78 -120 Z" fill="#20080a" />
-      <rect x="-52" y="-96" width="104" height="5" fill="#a62a1c" />
+    {/* Vermilion torii on the shore: tapered pillars, tie beam, shimagi and upswept kasagi roof */}
+    <g transform="translate(250 388)">
+      <path d="M-47 0 L-35 0 L-37 -100 L-45 -100 Z" fill="#a62a1c" />
+      <path d="M35 0 L47 0 L45 -100 L37 -100 Z" fill="#a62a1c" />
+      <rect x="-50" y="-4" width="18" height="6" rx="1.5" fill="#1a0a10" />
+      <rect x="32" y="-4" width="18" height="6" rx="1.5" fill="#1a0a10" />
+      <rect x="-52" y="-74" width="104" height="7" fill="#8c2216" />
+      <rect x="-4" y="-96" width="8" height="22" fill="#6e1a12" />
+      <rect x="-62" y="-101" width="124" height="7" fill="#a62a1c" />
+      <path d="M-80 -123 Q0 -105 80 -123 L66 -101 L-66 -101 Z" fill="#1b080c" />
     </g>
 
     {/* Five-storey pagoda with glowing windows */}
@@ -222,18 +307,6 @@ const Landscape: React.FC = () => (
           </g>
         );
       })}
-    </g>
-
-    {/* Yakatabune pleasure boat with lantern light */}
-    <g transform="translate(470 390)">
-      <ellipse cx="0" cy="-12" rx="52" ry="22" fill="url(#windowGlow)" opacity="0.5" />
-      <path d="M-46 -8 Q0 6 46 -8 L38 -16 L-38 -16 Z" fill="#05041a" />
-      <path d="M-30 -16 L-24 -34 L24 -34 L30 -16 Z" fill="#0a0820" />
-      <rect x="-18" y="-28" width="9" height="9" fill="#ffb85c" opacity="0.9" />
-      <rect x="-4" y="-28" width="9" height="9" fill="#ffb85c" opacity="0.9" />
-      <rect x="10" y="-28" width="9" height="9" fill="#ffb85c" opacity="0.9" />
-      <circle cx="-30" cy="-22" r="3" fill="#ff5a3c" />
-      <circle cx="30" cy="-22" r="3" fill="#ff5a3c" />
     </g>
 
     {/* Foreground shore */}
@@ -274,7 +347,6 @@ const SakuraBranch: React.FC = () => {
   );
 };
 
-const LANTERN_COUNT = 9;
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -290,6 +362,7 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
   const [hinted, setHinted] = useState(false);
   const [name, setName] = useState('');
   const launchTextRef = useRef<(text: string) => void>(() => {});
+  const previewRef = useRef<(s: Shape) => void>(() => {});
 
   const { playLaunch, playBoom } = useFireworkSound(soundEnabled);
 
@@ -310,9 +383,9 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
   );
 
   const petals = useMemo(
-    () => Array.from({ length: 16 }, (_, i) => ({
+    () => Array.from({ length: 6 }, (_, i) => ({
       left: rnd(i + 1) * 100, dx: (rnd(i + 20) - 0.5) * 260,
-      dur: 11 + rnd(i + 40) * 9, delay: -rnd(i + 60) * 20, size: 7 + rnd(i + 80) * 6,
+      dur: 20 + rnd(i + 40) * 12, delay: -rnd(i + 60) * 32, size: 7 + rnd(i + 80) * 6,
     })),
     []
   );
@@ -363,6 +436,10 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
 
     const launchRandom = () => launch(rand(w * 0.12, w * 0.88), rand(h * 0.1, wl * 0.5));
 
+    // Picking a shape fires one right away so you can see what it looks like.
+    previewRef.current = (sh: Shape) =>
+      launch(w / 2 + rand(-0.08, 0.08) * w, wl * 0.36, { shape: sh === 'random' ? pick(BURST_SHAPES) : (sh as BurstShape) });
+
     // Name show: a staggered volley of big colourful shells first, then the name itself.
     launchTextRef.current = (text: string) => {
       for (let i = 0; i < VOLLEY; i++) {
@@ -375,14 +452,14 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
           ),
         });
       }
-      scheduled.push({ t: VOLLEY * 16 + 105, fn: () => launch(w / 2, wl * 0.4, { text }) });
+      scheduled.push({ t: VOLLEY * 16 + 105, fn: () => launch(w / 2, wl * 0.42, { text }) });
     };
 
     const spawn = (x: number, y: number, vx: number, vy: number, h0: number, o: Partial<Particle> = {}) => {
       if (particles.length >= MAX_PARTICLES) return;
       particles.push({
         x, y, vx, vy,
-        life: 1, decay: rand(0.009, 0.015), h0, h1: h0,
+        life: 1, decay: rand(0.0065, 0.0105), h0, h1: h0,
         sat: 100, size: rand(1.4, 2.4), trail: 2,
         gravity: 0.04, friction: 0.965, fade: 1.5, sparkle: false, crackle: false, noGlow: false, droop: 0, twinkle: false, ...o,
       });
@@ -422,27 +499,36 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
 
       switch (r.shape) {
         case 'kiku': {
-          // Chrysanthemum: long comet streaks in one colour, with a contrasting pistil.
-          sphere(r.tx, r.ty, 240, v0 * 1.05, main.at, (hue) => ({
-            h1: toNext(hue), trail: 6, size: 2.2, decay: rand(0.006, 0.009), crackle: Math.random() < 0.22,
+          // Chrysanthemum: long comet tails that curve and fall, ending in glitter, with a contrasting core.
+          sphere(r.tx, r.ty, 220, v0 * 1.12, main.at, (hue) => ({
+            h1: toNext(hue), trail: 9, size: 2.1, gravity: 0.055, decay: rand(0.005, 0.0075), crackle: Math.random() < 0.35,
           }));
-          sphere(r.tx, r.ty, 70, v0 * 0.5, inner.at, () => ({ trail: 3, size: 2, decay: rand(0.009, 0.013) }));
+          sphere(r.tx, r.ty, 60, v0 * 0.45, inner.at, () => ({ trail: 4, size: 2, decay: rand(0.008, 0.011) }));
           break;
         }
         case 'botan': {
-          // Peony: dense, bright, short-lived ball of stars with no tails.
-          sphere(r.tx, r.ty, 340, v0, main.at, (hue) => ({
-            h1: toNext(hue), trail: 1.6, size: rand(2, 3), decay: rand(0.01, 0.016), sparkle: Math.random() < 0.4,
+          // Peony: a perfectly round ball of bright, tail-less stars that burn out quickly.
+          sphere(r.tx, r.ty, 380, v0 * 0.95, main.at, (hue) => ({
+            h1: toNext(hue), trail: 0.5, size: rand(2.8, 4), gravity: 0.015, fade: 2.5,
+            decay: rand(0.009, 0.013), sparkle: Math.random() < 0.3,
           }));
           break;
         }
         case 'double': {
-          // Concentric shells in two colours, plus a white-gold core ring.
-          sphere(r.tx, r.ty, 230, v0 * 1.05, main.at, () => ({ trail: 3, size: 2.4, decay: rand(0.008, 0.012) }));
-          sphere(r.tx, r.ty, 140, v0 * 0.58, inner.at, () => ({ trail: 2, size: 2.2, decay: rand(0.01, 0.014) }));
-          for (let i = 0; i < 36; i++) {
-            const a = (i / 36) * Math.PI * 2;
-            spawn(r.tx, r.ty, Math.cos(a) * v0 * 0.25, Math.sin(a) * v0 * 0.25, 48, { sat: 40, size: 2, decay: 0.016 });
+          // Two-layer shell: a flat ring of a second colour inside a broad outer sphere, white-gold pistil.
+          sphere(r.tx, r.ty, 200, v0 * 1.1, main.at, () => ({ trail: 2.5, size: 2.3, decay: rand(0.006, 0.009) }));
+          const ring = 80;
+          const tilt = rand(0.45, 1);
+          for (let i = 0; i < ring; i++) {
+            const a = (i / ring) * Math.PI * 2;
+            const hue = inner.at();
+            spawn(r.tx, r.ty, Math.cos(a) * v0 * 0.6, Math.sin(a) * v0 * 0.6 * tilt, hue < 0 ? 210 : hue, {
+              sat: hue < 0 ? 8 : 100, size: 3, trail: 1.5, decay: rand(0.007, 0.009),
+            });
+          }
+          for (let i = 0; i < 24; i++) {
+            const a = (i / 24) * Math.PI * 2;
+            spawn(r.tx, r.ty, Math.cos(a) * v0 * 0.2, Math.sin(a) * v0 * 0.2, 48, { sat: 40, size: 2, decay: 0.011 });
           }
           break;
         }
@@ -451,7 +537,7 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
           const willowHue = Math.random() < 0.25 ? -1 : 40;
           sphere(r.tx, r.ty, 190, v0 * 0.85, () => willowHue, (hue) => ({
             h1: willowHue < 0 ? hue : 28, trail: 5, size: 2.1, gravity: 0.065, friction: 0.972,
-            decay: rand(0.0035, 0.006), sparkle: true, crackle: Math.random() < 0.3,
+            decay: rand(0.0025, 0.0042), sparkle: true, crackle: Math.random() < 0.3,
           }));
           break;
         }
@@ -459,16 +545,21 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
           // The name is born inside a real burst: a big chrysanthemum blooms around it while gold
           // and silver glitter stars fly out from the same centre, settle into letters, flicker like
           // burning embers, then drift down as golden rain.
-          const pts = textPoints(r.text ?? '');
-          const vt = Math.min(R * 1.1, w * 0.3) * (1 - fric);
-          sphere(r.tx, r.ty, 260, v0 * 1.5, main.at, (hue) => ({
-            h1: toNext(hue), trail: 6, size: 2.2, decay: rand(0.006, 0.009), crackle: Math.random() < 0.2,
+          // Fit the text to the screen: nearly full width, and the sky between lanterns and horizon.
+          const { pts, scale } = textPoints(r.text ?? '', w * (w < 600 ? 0.92 : 0.8), wl * 0.52, Math.min(h * 0.2, 150));
+          // Smaller letters get finer stars so long lines stay crisp instead of merging into blobs.
+          const m = Math.max(0.42, Math.min(1.1, scale / 0.9));
+          const vt = (1 - fric) / fric;
+          // Wide, sparse halo so its streaks stay well outside the letters.
+          sphere(r.tx, r.ty, 170, v0 * 1.9, main.at, (hue) => ({
+            h1: toNext(hue), trail: 4, size: 2.1, decay: rand(0.0042, 0.0062), crackle: Math.random() < 0.2,
           }));
+          // Name stars: glowing gold embers scattered along the letters. Each one has its own size,
+          // flicker and lifetime, so the name shimmers like burning fire and dissolves into rain.
           for (const [px, py] of pts) {
-            const gold = Math.random() < 0.75;
-            spawn(r.tx, r.ty, px * vt, py * vt, gold ? rand(38, 52) : 210, {
-              sat: gold ? 85 : 10, size: rand(1.3, 2.4), trail: 3, gravity: 0, droop: 0.03, noGlow: Math.random() < 0.75,
-              decay: rand(0.003, 0.0048), fade: 4, twinkle: true, crackle: Math.random() < 0.04,
+            spawn(r.tx, r.ty, px * vt + rand(-0.06, 0.06), py * vt + rand(-0.06, 0.06), rand(30, 52), {
+              sat: rand(80, 100), size: rand(1.4, 2.5) * m, noGlow: m < 0.8 || Math.random() < 0.55, trail: 1.6, gravity: 0.0015, droop: 0.03, sparkle: true,
+              decay: rand(0.0015, 0.0026), fade: 5, twinkle: true, crackle: Math.random() < 0.05,
             });
           }
           break;
@@ -538,7 +629,7 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
         return;
       }
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = `rgba(0,0,0,${0.13 * Math.min(dt, 2)})`;
+      ctx.fillStyle = `rgba(0,0,0,${0.095 * Math.min(dt, 2)})`;
       ctx.fillRect(0, 0, w, h);
       ctx.globalCompositeOperation = 'lighter';
       ctx.lineCap = 'round';
@@ -569,7 +660,7 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
         g.addColorStop(1, `hsla(${f.hue},100%,50%,0)`);
         ctx.fillStyle = g;
         ctx.fillRect(f.x - rad, f.y - rad, rad * 2, rad * 2);
-        f.life -= 0.06 * dt;
+        f.life -= 0.045 * dt;
         if (f.life <= 0) flashes.splice(i, 1);
       }
 
@@ -580,7 +671,7 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
         const fr = Math.pow(p.friction, dt);
         p.vx *= fr; p.vy *= fr;
         p.vy += p.gravity * dt;
-        if (p.droop && p.life < 0.4) p.vy += p.droop * dt;
+        if (p.droop && p.life < 0.18) p.vy += p.droop * dt;
         p.x += p.vx * dt; p.y += p.vy * dt;
         p.life -= p.decay * dt;
 
@@ -598,7 +689,7 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
 
         let alpha = Math.min(1, p.life * p.fade);
         if (p.sparkle && p.life < 0.5 && Math.random() < 0.4) alpha *= 0.2;
-        if (p.twinkle) alpha *= 0.55 + 0.45 * Math.random();
+        if (p.twinkle) alpha *= 0.62 + 0.38 * Math.random();
         const age = 1 - p.life;
         const hue = p.h0 + (p.h1 - p.h0) * age;
         const light = 56 + 36 * Math.max(0, (p.life - 0.85) / 0.15); // white-hot at birth
@@ -638,7 +729,6 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
   };
 
   const waterPct = `${(1 - WATERLINE) * 100}%`;
-  const jp = '"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif';
 
   return (
     <div
@@ -680,52 +770,36 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
       </div>
 
       {/* River: flipped reflection, seigaiha wave pattern, depth tint, moon glitter */}
-      <div className="absolute left-0 w-full overflow-hidden pointer-events-none" style={{ top: `${WATERLINE * 100}%`, bottom: 0 }}>
-        <div className="absolute left-0 top-0 w-full" style={{ height: LAND_H, transform: 'scaleY(-1)', opacity: 0.4, filter: 'blur(1.5px)' }}>
+      <div className="absolute left-0 w-full overflow-hidden pointer-events-none" style={{
+        top: `${WATERLINE * 100}%`, bottom: 0,
+        // Mirrors the dusk sky at the horizon (pink afterglow, lighter violet), deepening with depth.
+        background: 'radial-gradient(ellipse 80% 55% at 50% 0%, rgba(255,120,140,0.2), transparent 75%), linear-gradient(180deg, #33245a 0%, #241a4e 30%, #120d33 70%, #080616 100%)',
+      }}>
+        <div className="absolute left-0 top-0 w-full" style={{ height: LAND_H, transform: 'scaleY(-1)', opacity: 0.8, filter: 'url(#hanabi-ripple) blur(0.8px)' }}>
           <Landscape />
         </div>
         <svg className="absolute inset-0 w-full h-full" aria-hidden>
           <defs>
+            <filter id="hanabi-ripple" x="-5%" y="-5%" width="110%" height="110%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.004 0.09" numOctaves="2" seed="4" result="n" />
+              <feDisplacementMap in="SourceGraphic" in2="n" scale="14" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
             <pattern id="seigaiha" width="48" height="24" patternUnits="userSpaceOnUse">
               {[[24, 24], [0, 12], [48, 12]].map(([cx, cy]) =>
                 [24, 18, 12, 6].map((r) => (
-                  <circle key={`${cx}-${cy}-${r}`} cx={cx} cy={cy} r={r} fill="none" stroke="rgba(160,170,255,0.2)" strokeWidth="1" />
+                  <circle key={`${cx}-${cy}-${r}`} cx={cx} cy={cy} r={r} fill="none" stroke="rgba(160,170,255,0.13)" strokeWidth="1" />
                 ))
               )}
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#seigaiha)" />
         </svg>
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(20,16,50,0.3) 0%, rgba(5,4,18,0.88) 100%)' }} />
-        {/* Moon glitter path on the water */}
-        {Array.from({ length: 8 }, (_, i) => (
-          <span key={i} className="absolute rounded-full" style={{
-            left: 'calc(74% + 21px)', top: 8 + i * 12, width: 46 - i * 4 + (i % 2) * 8, height: 2,
-            transform: 'translateX(-50%)', background: `rgba(255,244,200,${0.55 - i * 0.05})`, filter: 'blur(0.6px)',
-          }} />
-        ))}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(8,6,24,0) 0%, rgba(5,4,18,0.45) 100%)' }} />
       </div>
 
       {/* Sakura branch */}
       <div className="absolute top-0 right-0 w-[26%] max-w-[260px] pointer-events-none" aria-hidden>
         <SakuraBranch />
-      </div>
-
-      {/* Festival banners (nobori): 花火大会 "fireworks festival", 夏祭り "summer festival" */}
-      <div className="hidden md:flex absolute left-4 top-[4.5rem] gap-2 pointer-events-none" aria-hidden>
-        {['花火大会', '夏祭り'].map((t, i) => (
-          <div key={t} className="flex flex-col items-center" style={{ animation: `hanabi-flag ${4 + i}s ease-in-out infinite`, transformOrigin: 'top' }}>
-            <span className="block w-1 h-2 bg-stone-700" />
-            <div className="px-1.5 py-2 text-xs font-black"
-              style={{
-                writingMode: 'vertical-rl', fontFamily: jp, letterSpacing: '0.12em',
-                background: '#f3e9d2', color: i ? '#1d3a8a' : '#b3121f', boxShadow: '0 3px 10px rgba(0,0,0,0.45)',
-                borderTop: `3px solid ${i ? '#1d3a8a' : '#b3121f'}`,
-              }}>
-              {t}
-            </div>
-          </div>
-        ))}
       </div>
 
       <canvas
@@ -747,31 +821,6 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
         ))}
       </div>
 
-      {/* Hanging paper lanterns */}
-      <div className="absolute top-0 left-0 w-full h-16 pointer-events-none" aria-hidden>
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
-          <path d="M0 6 Q50 46 100 6" fill="none" stroke="#2a1a1a" strokeWidth="0.8" vectorEffect="non-scaling-stroke" />
-        </svg>
-        {Array.from({ length: LANTERN_COUNT }, (_, i) => {
-          const t = (i + 0.5) / LANTERN_COUNT;
-          const top = 6 + 4 * 20 * t * (1 - t); // matches the quadratic string above (% of height)
-          return (
-            <div key={i} className="absolute flex flex-col items-center"
-              style={{ left: `${t * 100}%`, top: `${top}%`, transform: 'translateX(-50%)', animation: `hanabi-glow ${2.4 + (i % 3) * 0.6}s ease-in-out infinite` }}>
-              <span className="block w-px h-1.5 bg-stone-900" />
-              <span className="block w-2 sm:w-3 h-[2px] bg-stone-900 rounded-sm" />
-              <span className="block w-[15px] sm:w-[20px] h-[19px] sm:h-[26px] rounded-[50%]"
-                style={{
-                  boxShadow: '0 0 11px 3px rgba(255,90,60,0.5), inset 0 0 5px rgba(120,0,0,0.5)',
-                  backgroundImage:
-                    'repeating-linear-gradient(180deg, transparent 0 4px, rgba(90,0,0,0.35) 4px 5px), radial-gradient(circle at 50% 40%, #ffb36b 0%, #ff5a3c 45%, #b3121f 100%)',
-                }} />
-              <span className="block w-2 sm:w-3 h-[2px] bg-stone-900 rounded-sm" />
-            </div>
-          );
-        })}
-      </div>
-
       {/* Hint */}
       {!hinted && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -790,7 +839,7 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          maxLength={24}
+          maxLength={30}
           placeholder="Type a name to light up the sky…"
           aria-label="Name to spell in fireworks"
           className="flex-1 min-w-0 bg-transparent text-sm text-white placeholder-white/45 outline-none"
@@ -812,7 +861,7 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
         {SHAPES.map((s) => (
           <button
             key={s.id}
-            onClick={() => setShape(s.id)}
+            onClick={() => { setShape(s.id); previewRef.current(s.id); }}
             aria-pressed={shape === s.id}
             title={s.label}
             className={`flex items-center gap-1.5 min-h-[36px] px-3 rounded-full text-xs font-bold whitespace-nowrap transition-colors
