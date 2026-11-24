@@ -395,9 +395,11 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext('2d')!;
 
+    // Render at the device's native pixel ratio (3x on recent iPhones) so streaks stay sharp. If a
+    // device can't keep up, the ratio steps down gradually (never below 1.5x) instead of stuttering.
+    let dpr = Math.min(window.devicePixelRatio || 1, 3);
     let w = 0, h = 0, wl = 0;
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = wrap.clientWidth;
       h = wrap.clientHeight;
       wl = h * WATERLINE;
@@ -509,7 +511,7 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
         case 'botan': {
           // Peony: a perfectly round ball of bright, tail-less stars that burn out quickly.
           sphere(r.tx, r.ty, 380, v0 * 0.95, main.at, (hue) => ({
-            h1: toNext(hue), trail: 0.5, size: rand(2.8, 4), gravity: 0.015, fade: 2.5,
+            h1: toNext(hue), trail: 0.5, size: rand(2.2, 3.3), gravity: 0.015, fade: 2.5,
             decay: rand(0.009, 0.013), sparkle: Math.random() < 0.3,
           }));
           break;
@@ -604,9 +606,21 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
       ctx.stroke();
     };
 
+    let slowFrames = 0, busyFrames = 0;
     const frame = (now: number) => {
-      const dt = Math.min((now - last) / 16.667, 3);
+      const elapsed = now - last;
+      const dt = Math.min(elapsed / 16.667, 3);
       last = now;
+
+      // Only judge performance while the sky is busy, and only ever step the resolution down.
+      if (particles.length > 400 && elapsed < 200) {
+        busyFrames++;
+        if (elapsed > 26) slowFrames++;
+        if (busyFrames >= 45) {
+          if (slowFrames > 18 && dpr > 1.5) { dpr = Math.max(1.5, dpr - 0.5); resize(); }
+          busyFrames = 0; slowFrames = 0;
+        }
+      }
 
       for (let i = scheduled.length - 1; i >= 0; i--) {
         scheduled[i].t -= dt;
@@ -629,7 +643,7 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
         return;
       }
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = `rgba(0,0,0,${0.095 * Math.min(dt, 2)})`;
+      ctx.fillStyle = `rgba(0,0,0,${0.12 * Math.min(dt, 2)})`;
       ctx.fillRect(0, 0, w, h);
       ctx.globalCompositeOperation = 'lighter';
       ctx.lineCap = 'round';
@@ -698,14 +712,23 @@ const FireworksGame: React.FC<FireworksGameProps> = ({ soundEnabled }) => {
         const col = `hsla(${hue},${p.sat}%,${light}%,${alpha})`;
         const refl = `hsla(${hue},${p.sat}%,${light}%,${alpha * 0.22})`;
         if (glow && !p.noGlow && p.size > 1.8) {
-          ctx.strokeStyle = `hsla(${hue},100%,55%,${alpha * 0.13})`;
-          ctx.lineWidth = p.size * 3.6;
+          ctx.strokeStyle = `hsla(${hue},100%,55%,${alpha * 0.1})`;
+          ctx.lineWidth = p.size * 2.3;
           ctx.beginPath();
           ctx.moveTo(tx, ty);
           ctx.lineTo(p.x, p.y);
           ctx.stroke();
         }
         streak(tx, ty, p.x, p.y, col, refl, p.size);
+        // Bright, thin core on top: gives every star a hard, sharp centre instead of a soft blob.
+        if (p.size > 1.6) {
+          ctx.strokeStyle = `hsla(${hue},${p.sat * 0.35}%,90%,${alpha})`;
+          ctx.lineWidth = p.size * 0.42;
+          ctx.beginPath();
+          ctx.moveTo(tx + (p.x - tx) * 0.5, ty + (p.y - ty) * 0.5);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+        }
       }
 
       raf = requestAnimationFrame(frame);
